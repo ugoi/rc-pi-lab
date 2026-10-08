@@ -21,8 +21,23 @@ Recovered implementation findings (not hidden success claims):
   backend write lock. The fix excludes writes from CLOSED and checks backend_open;
   device-only and real guest repeat executions pass. Failure logs are retained.
 
-Full partitioned image is assembled and its systemd cold-boot test is running.
-Bridge acceptance and measured video/HTML/PNG delivery have passed; image delivery
-is pending. Independent QA is organised separately by the parent task owner.
+Full partitioned image and normal systemd service cold boots have passed. The final
+QEMU snapshot run left the delivered raw image unchanged (SHA before/after match).
+Bridge, register and original package acceptance pass. Video, HTML and PNG were
+uploaded to Paperclip and downloaded again with matching SHA256. The image is
+728,439,365-byte gzip with full decompression/hash validation; private Nextcloud
+upload and full readback have passed with the exact compressed SHA256. The final disposition and reviewer are recorded on the Paperclip task. Independent QA is organised
+separately by the parent task owner. See acceptance.md for OS service limitations.
 No shared service, host configuration or network Pi was changed. Initial source
 checkpoint is https://github.com/ugoi/rc-pi-lab/commit/9ef431b74f8d96eca81735087591b4b18e0bb665.
+
+The shared filesystem again returned ENOSPC during xz compression. Only this task's
+incomplete output and reproducible input/source caches were removed. The raw image,
+QEMU binary, package wheels, source, and raw evidence remain. Final gzip compression
+used existing RAM-backed temporary storage, removed after verified cloud
+delivery; no new mount or infrastructure change was made.
+
+The task container was stopped after the guest tests (no running QEMU remains).
+Its idle PID1 needed Docker's final stop signal. Both full-image acceptance runs
+had already exited 0 after orderly poweroff; diagnostic acceptance had remounted
+its filesystem read-only. The raw image is retained.

@@ -8,7 +8,9 @@
   selected official Raspberry Pi OS image and are not replaced by lab shims.
 - **Root filesystem:** official Raspberry Pi OS Bookworm Lite ARM64 is the base.
   Added files are under `/opt/rc-lab`, the lab systemd unit and its enable symlink,
-  and a diagnostic `/rc-init`. Runtime state such as the journal changes on boot.
+  and a diagnostic `/rc-init`. Runtime state such as journals, machine ID and first-boot-generated guest SSH
+  host keys changes on boot; the supplied private image includes that initialised
+  state. These are guest-generated keys, not imported agent credentials.
   This is a derived image, not an unchanged publisher image.
 - **SD layout:** original boot partition, firmware, kernel and base DTBs are kept;
   application provisioning and I2C configuration are additions. The complete

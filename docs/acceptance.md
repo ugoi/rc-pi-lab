@@ -16,7 +16,7 @@ separately by the parent task owner; these are CTO execution results.
 | Bridge device regression | Paused QEMU, three close/reconnect cycles, QMP responsiveness | PASS; distinct from guest evidence |
 | Bridge during guest app | bridge-test.json, second unmodified app run | PASS: 995.52 before disconnect; fresh 1498.16 snapshot; 1995.92 and zero afterwards |
 | Visible servo | PNG, MP4, self-contained interactive HTML from trace | Produced and uploaded; PNG inspected, H.264/800x520/25fps video verified |
-| Full SD image / normal systemd | boot-image.log, image-boot-result.json | Test in progress; not yet accepted |
+| Full SD image / normal systemd | boot-image.log, image-boot-result.json | PASS: first boot, then immutable-base cold boot; service and poweroff succeed |
 | Physical Pi | Actual board variant, real firmware/SD boot, actual I2C/servo | NOT TESTED |
 
 Diagnostic cold boot through the first APP_PASS took 220.64 seconds on this shared
@@ -37,3 +37,22 @@ and the offline filesystem check passed before SD assembly. Raw logs retain this
 App identity, root filesystem identity and SD boot equivalence are separate:
 see [portability](portability.md). This is not the completion of vehicle physics,
 CAD, electrical power validation, network control, real Bluetooth or camera work.
+
+The first full systemd run took 750.42 seconds through poweroff. It showed initial
+failures for polkit, logind and NetworkManager and dependent ModemManager/network
+wait units; logind and NetworkManager subsequently started. These are preserved
+in `boot-image-first.log`. Overall OS service health is separate from the passed
+Adafruit service. Networking, login management and modem functionality are not
+accepted by a successful servo trace.
+
+The final cold boot with QEMU `-snapshot` passed in 802.07 seconds through shutdown
+and checksum readback. Base-image SHA256 before and after is identical:
+`8bd3e452033e0fb97b9432b823990a03b5956409f2836a8785983c867d57b40c`.
+The unchanged base image is the delivered raw image. This still uses an external
+kernel/modified DTB and does not prove real firmware boot. The final log retains
+an initial NetworkManager failure and dependent wait-online failure; NetworkManager
+then starts. General network/modem/client acceptance remains out of this proof.
+
+The gzip artifact is 728,439,365 bytes. Decompressing it yields exactly
+4,294,967,296 bytes and the tested raw SHA256; gzip CRC validation also passed.
+All timing above describes this shared x86 emulation host and this run only.

@@ -1,0 +1,12 @@
+{
+  "result": "PASS_SCOPED_SERVO_PATH",
+  "wall_seconds": 802.072078330908,
+  "qemu_exit": 0,
+  "snapshot": true,
+  "base_sha256_before": "8bd3e452033e0fb97b9432b823990a03b5956409f2836a8785983c867d57b40c",
+  "base_sha256_after": "8bd3e452033e0fb97b9432b823990a03b5956409f2836a8785983c867d57b40c",
+  "ancillary_boot_failures": [
+    "[FAILED] Failed to start NetworkManager.service - Network Manager.",
+    "[DEPEND] Dependency failed for Netw\u2026[0m - Network Manager Wait Online."
+  ]
+}

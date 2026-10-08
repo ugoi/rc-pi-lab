@@ -1,0 +1,22 @@
+{
+   "partitiontable": {
+      "label": "dos",
+      "id": "0xd9c86127",
+      "device": "build/rc-pi3.img",
+      "unit": "sectors",
+      "sectorsize": 512,
+      "partitions": [
+         {
+            "node": "build/rc-pi3.img1",
+            "start": 16384,
+            "size": 1048576,
+            "type": "c"
+         },{
+            "node": "build/rc-pi3.img2",
+            "start": 1064960,
+            "size": 4325376,
+            "type": "83"
+         }
+      ]
+   }
+}

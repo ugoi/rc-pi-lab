@@ -1,0 +1,7 @@
+{
+  "result": "PASS",
+  "decompressed_bytes": 4294967296,
+  "raw_sha256": "8bd3e452033e0fb97b9432b823990a03b5956409f2836a8785983c867d57b40c",
+  "gzip_bytes": 728439365,
+  "gzip_crc_verified": true
+}

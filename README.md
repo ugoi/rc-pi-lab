@@ -1,6 +1,6 @@
 # Pi 3 Linux / ServoKit / virtual PCA9685
 
-A real Raspberry Pi OS ARM64 guest on QEMU `raspi3b` runs unchanged original
+Verified: a real Raspberry Pi OS ARM64 guest on QEMU `raspi3b` runs unchanged original
 Adafruit ServoKit/PCA9685/Blinka/PureIO through Linux `/dev/i2c-1`. A QEMU I2C
 slave derives PWM from register traffic. The visible servo uses those measured
 PWM durations. There is no application API mock.
@@ -35,6 +35,8 @@ docker exec --user "$(id -u):$(id -g)" rc-pi-lab-builder \
 # QEMU has stopped. This converts the intermediate rootfs in place into a full SD.
 docker exec --user "$(id -u):$(id -g)" rc-pi-lab-builder python3 scripts/assemble-sd.py
 docker exec --user "$(id -u):$(id -g)" rc-pi-lab-builder python3 scripts/run-image.py
+# Optional immutable-base verification after the initial boot:
+docker exec --user "$(id -u):$(id -g)" -e SNAPSHOT=1 rc-pi-lab-builder python3 scripts/run-image.py
 ```
 
 The first guest run uses a diagnostic init and also executes the device matrix
@@ -80,3 +82,17 @@ MIT. QEMU, Linux and Python wheels retain their upstream licenses. The official
 Pi OS image includes separately licensed manufacturer boot firmware; the whole
 firmware stack is not claimed to be open source. NXP's datasheet is a specification
 reference, not included as a relicensed work.
+
+## Delivered image
+
+The private download is `rc-pi3-ste91-20261008.img.gz` (728,439,365 bytes).
+SHA256 values are in `evidence/image-sha256.txt`. Restore its raw 4-GiB container
+with `gzip -dc rc-pi3-ste91-20261008.img.gz > build/rc-pi3.img`. It was cold-booted
+with a temporary QEMU overlay and the base hash stayed identical. Extract the
+original `kernel8.img` and `bcm2710-rpi-3-b.dtb` from the image's FAT partition
+(offset 8388608), then use `scripts/prepare-dtb.sh` for the explicit virtual changes.
+
+The first systemd boot has already initialised guest runtime state. Some ancillary
+OS service starts failed/restarted in the emulator; read the acceptance report
+and raw logs. This delivery proves the servo path, not general network functionality
+or physical Pi boot. The actual Pi3 variant and physical calibration remain open.

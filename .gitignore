@@ -9,3 +9,6 @@ __pycache__/
 /evidence/brave-*.txt
 /evidence/artifact-*.json
 /evidence/workproduct-*.json
+
+/evidence/delivery-*.json
+/evidence/report-*.json

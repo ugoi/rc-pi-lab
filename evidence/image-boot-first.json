@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "wall_seconds": 750.4208259130828,
+  "qemu_exit": 0,
+  "ancillary_boot_failures": [
+    "[FAILED] Failed to start polkit.service - Authorization Manager.",
+    "[DEPEND] Dependency failed for Mode\u2026nager.service - Modem Manager.",
+    "[FAILED] Failed to start systemd-lo\u2026rvice - User Login Management.",
+    "[FAILED] Failed to start NetworkManager.service - Network Manager.",
+    "[DEPEND] Dependency failed for Netw\u2026[0m - Network Manager Wait Online."
+  ]
+}
