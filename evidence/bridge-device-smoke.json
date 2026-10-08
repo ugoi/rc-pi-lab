@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "open_snapshot_sequences": [
+    2,
+    4,
+    6
+  ],
+  "disconnect_cycles": 3,
+  "layer": "QEMU device, no guest"
+}

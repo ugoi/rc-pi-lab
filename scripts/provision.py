@@ -3,6 +3,9 @@
 from pathlib import Path
 import subprocess,zipfile,hashlib
 b=Path('build'); q=b/'packages';q.mkdir(exist_ok=True)
+# QEMU must be stopped; recover an interrupted guest journal before offline edits.
+fsck=subprocess.run(['e2fsck','-fy',str(b/'rootfs.img')])
+assert fsck.returncode in (0,1), 'Guest filesystem check failed'
 # pip validates both versions and hashes; host Python version cannot change ABI.
 subprocess.run(['python3','-m','venv',str(b/'pkgtools')],check=True)
 subprocess.run([str(b/'pkgtools/bin/pip'),'download','--require-hashes','--only-binary=:all:',
@@ -16,6 +19,7 @@ for f in sorted(q.rglob('*'),key=lambda p:(len(p.parts),str(p))):
     cmd.append('mkdir '+dest if f.is_dir() else f'write {f.resolve()} {dest}')
 for name in ('app.py','probe.py','verify_packages.py','run.sh'):
     cmd.append(f'write {Path("guest",name).resolve()} /opt/rc-lab/{name}')
+cmd.append(f'write {Path("scripts/device-matrix.py").resolve()} /opt/rc-lab/device-matrix.py')
 cmd += [f'write {Path("guest/rc-init").resolve()} /rc-init',
  'set_inode_field /rc-init mode 0100755',
  f'write {Path("guest/rc-lab.service").resolve()} /etc/systemd/system/rc-lab.service',

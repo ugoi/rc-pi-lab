@@ -10,12 +10,14 @@ def reader():
         for line in p.stdout: f.write(line);f.flush();lines.put(line)
     lines.put(None)
 threading.Thread(target=reader,daemon=True).start()
-def until(text,timeout=150):
+def until(text,timeout=600):
     end=time.monotonic()+timeout
     while time.monotonic()<end:
         line=lines.get(timeout=end-time.monotonic())
         if line is None: raise RuntimeError(f'QEMU exited {p.poll()}: waiting {text}')
         if text in line:return line
+        if 'Kernel panic' in line or 'APP_EXIT=1' in line:
+            raise RuntimeError('Guest failed: '+line.strip())
     raise TimeoutError(text)
 def command(cmd):p.stdin.write(cmd+'\n');p.stdin.flush()
 def connect():
@@ -41,9 +43,10 @@ try:
     off=pwm(bf,0)
     bf.close();b.close()
     until('REPEAT_EXIT=0')
+    command('sync; mount -o remount,ro /dev/mmcblk0 /; echo DISK_CLEAN=$?')
+    until('DISK_CLEAN=0')
     Path('evidence/bridge-test.json').write_text(json.dumps(dict(result='PASS',cold_boot_app_seconds=cold,before_disconnect=before,reconnect_snapshot=snapshot,after_reconnect=after,full_off=off),indent=2)+'\n')
     print('PASS guest app, device matrix, disconnect/reconnect; seconds',round(time.monotonic()-started,2),flush=True)
-    command('sync')
 finally:
     p.terminate()
     try:p.wait(timeout=10)

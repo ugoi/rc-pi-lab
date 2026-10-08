@@ -1,0 +1,75 @@
+{
+  "checked_on": "2026-10-08",
+  "repositories": [
+    {
+      "full_name": "qemu/qemu",
+      "html_url": "https://github.com/qemu/qemu",
+      "stargazers_count": 13827,
+      "pushed_at": "2026-10-07T07:57:51Z",
+      "archived": false,
+      "license": {
+        "key": "other",
+        "name": "Other",
+        "spdx_id": "NOASSERTION",
+        "url": null,
+        "node_id": "MDc6TGljZW5zZTA="
+      }
+    },
+    {
+      "full_name": "adafruit/Adafruit_CircuitPython_ServoKit",
+      "html_url": "https://github.com/adafruit/Adafruit_CircuitPython_ServoKit",
+      "stargazers_count": 78,
+      "pushed_at": "2026-04-23T21:24:49Z",
+      "archived": false,
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      }
+    },
+    {
+      "full_name": "adafruit/Adafruit_CircuitPython_PCA9685",
+      "html_url": "https://github.com/adafruit/Adafruit_CircuitPython_PCA9685",
+      "stargazers_count": 158,
+      "pushed_at": "2026-04-23T21:03:05Z",
+      "archived": false,
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      }
+    },
+    {
+      "full_name": "adafruit/Adafruit_Blinka",
+      "html_url": "https://github.com/adafruit/Adafruit_Blinka",
+      "stargazers_count": 539,
+      "pushed_at": "2026-10-01T18:35:59Z",
+      "archived": false,
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      }
+    },
+    {
+      "full_name": "adafruit/Adafruit_Python_PureIO",
+      "html_url": "https://github.com/adafruit/Adafruit_Python_PureIO",
+      "stargazers_count": 53,
+      "pushed_at": "2026-09-24T19:42:09Z",
+      "archived": false,
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      }
+    }
+  ]
+}

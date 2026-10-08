@@ -2,6 +2,7 @@
 import base64,csv,hashlib,json,pathlib
 root=pathlib.Path('/opt/rc-lab/packages'); checked=0; failures=[]
 for record in sorted(root.glob('*.dist-info/RECORD')):
+    print('AUDIT_WHEEL',record.parent.name,flush=True)
     for path,digest,size in csv.reader(record.open()):
         if not digest: continue
         algorithm,expected=digest.split('=',1)

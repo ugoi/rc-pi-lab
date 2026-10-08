@@ -1,0 +1,5 @@
+{
+  "qemu_version": "10.1.0",
+  "bcm2835_i2c_changed": false,
+  "sha256": "8f586520aa9d2ab575c6fe29f63bc11c44b407493571cf81d14ffe6aa43febb7"
+}

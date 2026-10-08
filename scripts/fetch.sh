@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-mkdir -p build
+mkdir -p build evidence
 cd build
 fetch() { test -f "$2" || curl --fail --location --retry 2 "$1" -o "$2"; }
 fetch https://download.qemu.org/qemu-10.1.0.tar.xz qemu-10.1.0.tar.xz

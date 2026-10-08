@@ -1,0 +1,23 @@
+{
+  "result": "PASS",
+  "angles_from_register_path": [
+    {
+      "target_us": 1000,
+      "measured_us": 995.52,
+      "seq": 66,
+      "virtual_ns": 211487144983
+    },
+    {
+      "target_us": 1500,
+      "measured_us": 1498.16,
+      "seq": 73,
+      "virtual_ns": 213511797259
+    },
+    {
+      "target_us": 2000,
+      "measured_us": 1995.92,
+      "seq": 80,
+      "virtual_ns": 215541389321
+    }
+  ]
+}

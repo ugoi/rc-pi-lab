@@ -1,29 +1,28 @@
-# STE-91 implementation checkpoint (not acceptance)
+# Execution checkpoint — 2026-10-08
 
-Official inputs verified: Raspberry Pi OS Lite arm64 2025-05-13 archive SHA256
-62d025b9bc7ca0e1facfec74ae56ac13978b6745c58177f081d39fbb8041ed45;
-QEMU 10.1.0 tarball e0517349b50ca73ebec2fa85b06050d5c463ca65c738833bd8fc1f15f180be51.
-Host agent-services, isolated Docker ste91-builder, 2 CPU, 1400 MiB limit. No host change.
+Executed in the task-owned Docker container on Agent Services. QEMU 10.1.0 is
+built with the PCA9685 device; its BCM2835 controller remains byte-identical to
+upstream. Raspberry Pi OS Bookworm cold boots with kernel 6.12.25+rpt-rpi-v8,
+four Cortex-A53 CPUs and `/dev/i2c-1`.
 
-Model core unit tests executed successfully. QEMU model compilation and guest boot pending.
-Guest rootfs is build/rootfs.img, original packages and app injected via debugfs.
-Original SD archive retained; expanded base.img deliberately removed after extraction
-because shared host ran out of disk (ENOSPC). Preserve source/app and rootfs.img.
-Kernel8 and DTB in build/boot extracted from official image. qemu-rpi3.dtb only changes
-/soc/i2c@7e804000 status to okay so far. Complete SD image still to be assembled.
-Guest rc-init is a diagnostic init; it is not a final systemd deployment.
+The real guest verified 631 hashed files from 17 original PyPI wheels, the exact
+application SHA, combined PureIO reads, ServoKit 0/90/180, invalid angle rejection,
+full-off and driver reset. Its device matrix passed block reads, full-on/full-off,
+ALL_LED fan-out, sleep/restart and prescale cases.
 
-Compile: docker exec --user 1001:1001 ste91-builder /work/scripts/build-qemu.sh
-Outputs: evidence/qemu-build.log and .exit; prior exit may be stale during a run.
-The QEMU meson file must add pca9685.c BEFORE system_ss.add_all (fixed after first
-configure failed). Pi-only config contains CONFIG_RASPI=y and uses --without-default-devices.
+Recovered implementation findings (not hidden success claims):
+- The minimal QEMU build needs OR_IRQ and UNIMP in addition to RASPI.
+- The external DTB needs UART aliases and the firmware-style board revision
+  0xa02082 for the original OS GPIO library. These are virtual board properties,
+  not a physical inventory claim or an application shim.
+- After an interrupted guest, replay the ext4 journal before debugfs writes and
+  byte-verify their result. The harness now remounts read-only before termination.
+- The bridge close callback initially deadlocked by re-entering the character
+  backend write lock. The fix excludes writes from CLOSED and checks backend_open;
+  device-only and real guest repeat executions pass. Failure logs are retained.
 
-Next: finish compile; boot raspi3b with stock BCM controller and combined PureIO read.
-Capture failure before implementing controller correction if required. Then ServoKit,
-bridge reconnect, visualization, package hash audit, full image, delivery and pushed repo.
-Not yet created Git repository or remote. No QA task: CEO owns separate QA.
-
-Research: native search and Brave web ran. Wokwi MIT model found, inspected; not reused
-because Wokwi runtime dependency and incomplete addressing/register semantics.
-Brave Research hit HTTP 402 monthly cap after fixing minimum tokens parameter.
-No provider budget change. Hindsight tools unavailable in active tool catalog.
+Full partitioned image is assembled and its systemd cold-boot test is running.
+Bridge acceptance and measured video/HTML/PNG delivery have passed; image delivery
+is pending. Independent QA is organised separately by the parent task owner.
+No shared service, host configuration or network Pi was changed. Initial source
+checkpoint is https://github.com/ugoi/rc-pi-lab/commit/9ef431b74f8d96eca81735087591b4b18e0bb665.

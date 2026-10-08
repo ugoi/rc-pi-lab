@@ -27,3 +27,17 @@ visualisation link, not a safety-certified ESC failsafe. No commands bypass gues
 
 No vehicle physics, collision acceptance, Bluetooth, camera, motor/ESC arming,
 electrical safety, real Pi boot or actual Pi variant acceptance is claimed.
+
+## BCM2835 controller boundary
+
+The QEMU 10.1.0 BCM2835 I2C controller is upstream and unchanged. The initial real
+Linux `I2C_RDWR` combined pointer-write/read succeeded using original PureIO.
+The device trace nevertheless shows `pointer -> stop -> start_read -> read -> stop`.
+This is a functional register-read result for this slave, whose address pointer
+survives STOP. It is not a faithful repeated-START waveform or proof for arbitrary
+I2C slaves. The original Linux driver and original Adafruit combined-read path are
+not modified or replaced to hide that difference.
+
+Device `ns` values use QEMU's virtual clock; guest `monotonic_ns` uses the Linux
+clock. They are distinct clock origins. Correlation is by ordered register
+transactions and their PWM states, not equality of the two absolute timestamps.

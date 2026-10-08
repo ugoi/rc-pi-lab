@@ -6,6 +6,9 @@ p=argparse.ArgumentParser();p.add_argument('trace');p.add_argument('boot');a=p.p
 rows=[json.loads(x) for x in Path(a.trace).read_text().splitlines()]
 boot=Path(a.boot).read_text(errors='replace')
 assert 'APP_PASS' in boot, 'guest app did not pass'
+assert rows[0]['event']=='reset' and rows[0]['mode1']==17 and rows[0]['prescale']==30
+assert all(v==0 for v in rows[0]['high_us']), 'power-on reset signal'
+assert 'DRIVER_RESET_MODE1 0' in boot, 'original PCA driver reset not verified'
 assert 'MODE1_READ' in boot, 'no successful original PureIO combined read'
 assert '"modified_files": []' in boot, 'original wheel bytes not verified'
 assert 'INVALID_REJECTED -1' in boot and 'INVALID_REJECTED 181' in boot

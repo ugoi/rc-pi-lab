@@ -14,6 +14,7 @@ modprobe i2c-bcm2835
 modprobe i2c-dev
 ls -l /dev/i2c*
 export PYTHONPATH=/opt/rc-lab/packages
+echo AUDIT_START
 python3 -u /opt/rc-lab/verify_packages.py
 python3 -u /opt/rc-lab/probe.py
 python3 -u /opt/rc-lab/app.py

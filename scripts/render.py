@@ -2,7 +2,7 @@
 """Render measured device PWM, never application angle commands."""
 import argparse, json, math
 from pathlib import Path
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 def state(row):
     width=row['high_us'][0]
@@ -12,7 +12,7 @@ def state(row):
 
 def draw(row):
     valid,angle=state(row)
-    im=Image.new('RGB',(800,520),'#102033'); d=ImageDraw.Draw(im)
+    im=Image.new('RGB',(800,520),'#102033'); d=ImageDraw.Draw(im); d.font=ImageFont.load_default(size=19)
     d.text((28,20),'Pi 3 Linux -> ServoKit -> Linux I2C -> PCA9685 -> PWM',fill='white')
     d.rounded_rectangle((240,265,560,400),radius=16,fill='#27678e',outline='#78cfff',width=3)
     d.text((340,365),'VIRTUAL SERVO',fill='white')

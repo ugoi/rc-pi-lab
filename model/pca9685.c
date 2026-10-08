@@ -30,7 +30,9 @@ static void record(Pca9685State *s, const char *kind, int reg, int value) {
         "%s%.2f", c ? "," : "", pca_high_ticks(&s->core,c)/25.0);
     n += snprintf(line+n, sizeof(line)-n, "]}\n");
     if (s->trace) { fputs(line,s->trace); fflush(s->trace); }
-    if (qemu_chr_fe_backend_connected(&s->bridge)) qemu_chr_fe_write(&s->bridge,(uint8_t *)line,n);
+    /* CLOSED callbacks run under the chardev write lock. Never re-enter it.
+     * backend_connected only means configured, not an open peer. */
+    if (strcmp(kind,"bridge_closed") && qemu_chr_fe_backend_open(&s->bridge)) qemu_chr_fe_write(&s->bridge,(uint8_t *)line,n);
 }
 static void bridge_event(void *opaque, QEMUChrEvent event) {
     Pca9685State *s=opaque;
@@ -66,7 +68,9 @@ static void realize(DeviceState *dev, Error **errp) {
     qemu_chr_fe_set_handlers(&s->bridge,NULL,NULL,bridge_event,NULL,s,NULL,true);
 }
 static void finalize(Object *obj) {
-    Pca9685State *s=PCA9685(obj); if (s->trace) fclose(s->trace);
+    Pca9685State *s=PCA9685(obj);
+    qemu_chr_fe_deinit(&s->bridge, false);
+    if (s->trace) fclose(s->trace);
 }
 static const Property props[] = {
     DEFINE_PROP_CHR("chardev",Pca9685State,bridge),

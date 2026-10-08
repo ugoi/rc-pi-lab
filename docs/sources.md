@@ -50,3 +50,8 @@ The CEO's subsequent source audit reports that newer Velxio documents raspi3b bu
 lacks I2C forwarding/network, and rpi-image-gen only formally supports native
 Debian arm64 hosts. This recipe modifies a pinned official prebuilt image with
 filesystem tools on x86; it is not presented as a supported rpi-image-gen build.
+
+Live upstream metadata (stars, last push, archive flag and GitHub license detection)
+is saved in `evidence/upstream-metadata.json`; stars are not a quality benchmark.
+The missing firmware-style DT revision was identified against the original OS
+rpi-lgpio code and QEMU `hw/arm/raspi.c` (raspi3b board_rev=0xa02082).

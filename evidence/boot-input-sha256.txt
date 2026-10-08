@@ -1,0 +1,3 @@
+c6eb11fa5530b52d9ad7182e6ee7f085de50fc07b480e91ec0f301c6fc5d6f47  build/boot/kernel8.img
+3ebde6c06becb3f7ce397508264cb12eab398cb934d8e4fc6f2d859d299d9e62  build/boot/bcm2710-rpi-3-b.dtb
+80f23c2aaa8f9223288c874c9d9800da522619c595c8934b15aaf722183b1df9  build/boot/qemu-rpi3.dtb
