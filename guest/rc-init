@@ -1,0 +1,21 @@
+#!/bin/sh
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t tmpfs tmpfs /run
+mount -o remount,rw /
+echo '=== STE91 COLD BOOT ==='
+uname -a
+cat /etc/os-release
+cat /proc/cpuinfo
+tr '\000' '\n' < /proc/device-tree/model
+modprobe i2c-bcm2835
+modprobe i2c-dev
+ls -l /dev/i2c*
+export PYTHONPATH=/opt/rc-lab/packages
+python3 -u /opt/rc-lab/verify_packages.py
+python3 -u /opt/rc-lab/probe.py
+python3 -u /opt/rc-lab/app.py
+echo APP_EXIT=$?
+exec /bin/sh

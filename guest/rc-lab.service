@@ -1,0 +1,14 @@
+[Unit]
+Description=Pi PCA9685 ServoKit demonstration
+After=systemd-modules-load.service
+ConditionKernelCommandLine=rc_lab.demo=1
+
+[Service]
+Type=oneshot
+Environment=PYTHONPATH=/opt/rc-lab/packages
+ExecStart=/bin/sh /opt/rc-lab/run.sh
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

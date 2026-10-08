@@ -1,0 +1,10 @@
+/build/
+/evidence/*.jsonl
+/evidence/*.log
+/evidence/*.exit
+/evidence/*.mp4
+/evidence/*.png
+__pycache__/
+/evidence/brave-*.json
+/evidence/brave-*.txt
+/evidence/artifact-*.json
