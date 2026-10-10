@@ -81,7 +81,9 @@ Use a separate checkout and separate `build/m3`/`evidence/m3` directories. Suppl
 known immutable M2 inputs into that checkout and prepare its own derived image.
 Set `M3_GUEST_CONTAINER=rc-pi-m3-qa-qemu`,
 `M3_PHYSICS_CONTAINER=rc-pi-m3-qa-webots`, `M3_PORT=18091`, and
-`M3_URL=http://127.0.0.1:18091` before Compose and test helpers. Set
+`M3_URL=http://127.0.0.1:18091` before Compose and test helpers. Use a separate Compose project as well:
+`docker compose -p ste114 -f m3/compose.yaml up -d` (and the same `-p ste114`
+when stopping). Container names alone do not isolate Compose project ownership. Set
 `M3_BROWSER_SESSION=ste114` for the browser script, preserving the existing
 Cloak owner and all other tabs. The source does not require a repair or a private
 replacement harness to use isolated container names/ports. To run fault cases,
@@ -91,7 +93,10 @@ fault-injection operations, not a different acceptance algorithm.
 The raw log directory is owned by this preview. Current evidence is archived on
 STE-112 before handoff. Stop the preview after review to stop CPU use and log
 growth; restarting the guest preserves its previous raw PCA trace through
-`m3/tests/restart_guest.py`. There is no automatic crash recovery or auto-arm.
+`m3/tests/restart_guest.py`. This helper stops/restarts the whole guest/bridge
+Compose container, preserves its fault/audit configuration and requires a new
+bridge epoch with fresh neutral ACKs. It does not assume an always-running
+development shell. There is no automatic crash recovery or auto-arm.
 
 ## Latency interpretation
 

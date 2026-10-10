@@ -111,3 +111,20 @@ PCA PWM can remain active after a guest crash. The successful emergency stops
 are independent **simulation brakes**, not a proven physical shutdown circuit.
 Real ESC/servo calibration, hardware cutoff, electrical limits, suspension,
 terrain/climbing behavior and full-car safety remain outside this delivery.
+
+## Final Compose restart correction
+
+The final reproduction review found that the old guest-restart helper assumed an
+always-running development container. In the delivered Compose runtime, ending
+QEMU also ends its container supervisor. The helper now stops/starts that owned
+container, preserving configured fault/audit flags, archives its PCA trace before
+start and requires a new bridge epoch with fresh neutral ACKs. This actual full
+restart passed in **263.510 wall seconds**, including another 631-file original
+package audit with zero modifications, ending STOPPED. QA must use its own
+Compose project name as well as its own container names and port.
+
+This last correction changes only the reproduction helper and documentation;
+vehicle control, watchdogs, physics, UI and guest image are unchanged from video
+commit `71b937fb4f174d96c64726636929afc708958dca`. A browser navigation CLI hung
+while leaving the test tab; only that CLI process was stopped, preserving the
+shared browser service. It did not prevent the verified Compose restart.
