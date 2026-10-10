@@ -1,0 +1,35 @@
+services:
+  guest:
+    image: rc-pi-lab-builder
+    container_name: ${M3_GUEST_CONTAINER:-rc-pi-m3-qemu}
+    user: "1001:1001"
+    cpus: 4
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 256
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    working_dir: /work
+    command: [sh, m3/run_guest_bridge.sh]
+    environment:
+      M3_TESTING: "${M3_TESTING:-0}"
+    ports: ["127.0.0.1:${M3_PORT:-18090}:8090"]
+    volumes: ["..:/work"]
+    stop_grace_period: 10s
+  physics:
+    image: cyberbotics/webots@sha256:f0023e30daf38b172e4e6ad24ed345909bcd9551df34d63d824e121a7cebf099
+    container_name: ${M3_PHYSICS_CONTAINER:-rc-pi-m3-webots}
+    user: "1001:1001"
+    cpus: 2
+    mem_limit: 2g
+    memswap_limit: 2g
+    pids_limit: 256
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    network_mode: none
+    environment:
+      HOME: /tmp
+    volumes: ["..:/work"]
+    entrypoint: [/bin/bash, -c]
+    command: ["xvfb-run -a webots --stdout --stderr --batch --mode=realtime --no-rendering /work/m3/worlds/offroad.wbt >> /work/evidence/m3/webots.log 2>&1"]
+    stop_grace_period: 10s

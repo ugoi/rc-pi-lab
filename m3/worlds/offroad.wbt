@@ -1,0 +1,41 @@
+#VRML_SIM R2025a utf8
+WorldInfo { basicTimeStep 16 coordinateSystem "ENU"
+ contactProperties [ ContactProperties { material1 "rubber" material2 "ground" coulombFriction [ 1.0 ] bumpSound "" rollSound "" slideSound "" bounce 0 softERP 0.3 softCFM 0.00001 } ] }
+Viewpoint { orientation 0.3 0.7 0.65 2.3 position 2 -2 1.8 }
+Background { skyColor [ 0.07 0.10 0.16 ] }
+DirectionalLight { direction -1 1 -2 }
+Solid { translation 0 0 -0.05 name "ground" contactMaterial "ground"
+ children [ Shape { appearance PBRAppearance { baseColor 0.25 0.32 0.26 roughness 1 metalness 0 } geometry Box { size 20 20 0.1 } } ] boundingObject Box { size 20 20 0.1 } }
+DEF OBSTACLE Solid { translation 1.8 0 0.10 name "obstacle" contactMaterial "ground"
+ children [ Shape { appearance PBRAppearance { baseColor 0.72 0.38 0.15 roughness 1 metalness 0 } geometry Box { size 0.30 1.2 0.20 } } ] boundingObject Box { size 0.30 1.2 0.20 } }
+DEF CAR Robot { translation 0 0 0.15 name "provisional 4x4" supervisor TRUE controller "vehicle"
+ children [
+ Shape { appearance PBRAppearance { baseColor 0.1 0.65 0.9 roughness 0.6 metalness 0 } geometry Box { size 0.44 0.24 0.1 } }
+Hinge2Joint { jointParameters HingeJointParameters { axis 0 0 1 anchor 0.16 0.16 -0.06 minStop -0.5 maxStop 0.5 }
+ device [ RotationalMotor { name "steer_fl" sound "" maxVelocity 1.5 maxTorque 1.0 minPosition -0.5 maxPosition 0.5 } PositionSensor { name "steer_sensor_fl" } ]
+ jointParameters2 JointParameters { axis 0 1 0 dampingConstant 0.001 }
+ device2 [ RotationalMotor { name "drive_fl" sound "" maxVelocity 8.0 acceleration 12.0 maxTorque 0.35 } Brake { name "brake_fl" } PositionSensor { name "wheel_sensor_fl" } ]
+ endPoint DEF WHEEL_FL Solid { translation 0.16 0.16 -0.06 rotation 1 0 0 1.57079632679 name "wheel_fl" contactMaterial "rubber"
+ children [ Shape { appearance PBRAppearance { baseColor 0.045 0.05 0.06 roughness 1 metalness 0 } geometry Cylinder { radius 0.07 height 0.045 subdivision 24 } } ]
+ boundingObject Cylinder { radius 0.07 height 0.045 subdivision 24 }
+ physics Physics { density -1 mass 0.12 } } }
+Hinge2Joint { jointParameters HingeJointParameters { axis 0 0 1 anchor 0.16 -0.16 -0.06 minStop -0.5 maxStop 0.5 }
+ device [ RotationalMotor { name "steer_fr" sound "" maxVelocity 1.5 maxTorque 1.0 minPosition -0.5 maxPosition 0.5 } PositionSensor { name "steer_sensor_fr" } ]
+ jointParameters2 JointParameters { axis 0 1 0 dampingConstant 0.001 }
+ device2 [ RotationalMotor { name "drive_fr" sound "" maxVelocity 8.0 acceleration 12.0 maxTorque 0.35 } Brake { name "brake_fr" } PositionSensor { name "wheel_sensor_fr" } ]
+ endPoint DEF WHEEL_FR Solid { translation 0.16 -0.16 -0.06 rotation 1 0 0 1.57079632679 name "wheel_fr" contactMaterial "rubber"
+ children [ Shape { appearance PBRAppearance { baseColor 0.045 0.05 0.06 roughness 1 metalness 0 } geometry Cylinder { radius 0.07 height 0.045 subdivision 24 } } ]
+ boundingObject Cylinder { radius 0.07 height 0.045 subdivision 24 }
+ physics Physics { density -1 mass 0.12 } } }
+HingeJoint { jointParameters HingeJointParameters { axis 0 1 0 anchor -0.16 0.16 -0.06 dampingConstant 0.001 } device [ RotationalMotor { name "drive_rl" sound "" maxVelocity 8.0 acceleration 12.0 maxTorque 0.35 } Brake { name "brake_rl" } PositionSensor { name "wheel_sensor_rl" } ]
+ endPoint DEF WHEEL_RL Solid { translation -0.16 0.16 -0.06 rotation 1 0 0 1.57079632679 name "wheel_rl" contactMaterial "rubber"
+ children [ Shape { appearance PBRAppearance { baseColor 0.045 0.05 0.06 roughness 1 metalness 0 } geometry Cylinder { radius 0.07 height 0.045 subdivision 24 } } ]
+ boundingObject Cylinder { radius 0.07 height 0.045 subdivision 24 }
+ physics Physics { density -1 mass 0.12 } } }
+HingeJoint { jointParameters HingeJointParameters { axis 0 1 0 anchor -0.16 -0.16 -0.06 dampingConstant 0.001 } device [ RotationalMotor { name "drive_rr" sound "" maxVelocity 8.0 acceleration 12.0 maxTorque 0.35 } Brake { name "brake_rr" } PositionSensor { name "wheel_sensor_rr" } ]
+ endPoint DEF WHEEL_RR Solid { translation -0.16 -0.16 -0.06 rotation 1 0 0 1.57079632679 name "wheel_rr" contactMaterial "rubber"
+ children [ Shape { appearance PBRAppearance { baseColor 0.045 0.05 0.06 roughness 1 metalness 0 } geometry Cylinder { radius 0.07 height 0.045 subdivision 24 } } ]
+ boundingObject Cylinder { radius 0.07 height 0.045 subdivision 24 }
+ physics Physics { density -1 mass 0.12 } } }
+] boundingObject Box { size 0.44 0.24 0.1 }
+ physics Physics { density -1 mass 2.0 centerOfMass [0 0 -0.01] inertiaMatrix [ 0.011266666666666666 0.033933333333333336 0.04186666666666666, 0 0 0 ] } }

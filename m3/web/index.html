@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Pi 3 · Offroad Labor</title>
+  <style>
+    body {
+      margin: 0;
+      background: #101823;
+      color: #edf3fa;
+      font: 16px system-ui;
+    }
+    header,
+    aside {
+      padding: 18px 24px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #344;
+    }
+    h1 {
+      font-size: 22px;
+      margin: 0;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+    }
+    canvas {
+      width: 100%;
+      height: 70vh;
+      touch-action: none;
+      background: #17212d;
+    }
+    aside {
+      background: #1c2b3a;
+    }
+    label {
+      display: block;
+      margin: 24px 0 5px;
+    }
+    input {
+      width: 100%;
+    }
+    button {
+      padding: 14px;
+      margin: 8px 4px 8px 0;
+      border: 0;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #stop {
+      background: #ff655f;
+      color: #201010;
+    }
+    #arm {
+      background: #6cd9b7;
+    }
+    small,
+    p {
+      color: #afc4d5;
+      line-height: 1.5;
+    }
+    output {
+      font-variant-numeric: tabular-nums;
+    }
+    #status {
+      font-weight: bold;
+      color: #ffe19a;
+    }
+    footer {
+      padding: 15px 24px;
+      color: #9ab0c2;
+    }
+    pre {
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    @media (max-width: 800px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      canvas {
+        height: 50vh;
+      }
+    }
+  </style>
+  <header>
+    <h1>Pi 3 · Offroad Labor</h1>
+    <span>Webots R2025a · LIVE</span>
+  </header>
+  <main>
+    <section>
+      <canvas id="view"></canvas>
+      <footer>
+        Ziehen: Ansicht drehen · Mausrad: Zoom · Leertaste: STOP<br />Live-Geometrie
+        aus Webots-Kontaktphysik. Vorläufiges Fahrzeugmodell, kein echter Wagen.
+      </footer>
+    </section>
+    <aside>
+      <div id="status">Verbinde …</div>
+      <p id="reason"></p>
+      <button id="arm">Start / neutral armen</button
+      ><button id="stop">STOP</button
+      ><label for="throttle">Gas / Rückwärts <output id="tv">0 %</output></label
+      ><input
+        id="throttle"
+        type="range"
+        min="-100"
+        max="100"
+        value="0"
+        step="5"
+      /><label for="steer">Lenkung <output id="sv">0 %</output></label
+      ><input
+        id="steer"
+        type="range"
+        min="-100"
+        max="100"
+        value="0"
+        step="5"
+      /><button id="center">Lenkung mittig</button>
+      <p>
+        Start bei neutralem Gas. Stop oder Verbindungsausfall verriegelt den
+        Antrieb; erneutes Starten ist nötig. Richtungswechsel bremst zuerst.
+      </p>
+      <pre id="metrics"></pre>
+      <small
+        >Transport: HTTP → serielle QEMU-Konsole → Pi-Linux → originale
+        Adafruit-Bibliotheken → I²C/PCA9685 → PWM → Webots. Keine
+        Netzwerk-/Bluetooth-Abnahme des Pi.</small
+      >
+    </aside>
+  </main>
+  <script src="/app.js"></script>
+</html>
