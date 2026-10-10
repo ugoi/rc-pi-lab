@@ -1,0 +1,137 @@
+{
+  "date": "2026-10-10",
+  "baseline": "da00fc758bb8014e7ffc05d754a2b5149af8f9a4",
+  "F1": {
+    "result": "PASS",
+    "exit": 0,
+    "memory_limit": 2147483648,
+    "swap_limit": 0,
+    "memory_peak_including_page_cache": 2147483648,
+    "events_before": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0,
+      "oom_group_kill": 0
+    },
+    "events_after": {
+      "low": 0,
+      "high": 0,
+      "max": 800,
+      "oom": 0,
+      "oom_kill": 0,
+      "oom_group_kill": 0
+    }
+  },
+  "F2": {
+    "result": "PASS",
+    "guest_runs": [
+      {
+        "run": 1,
+        "result": "PASS",
+        "timings": {
+          "cold_ready_seconds": 224.78225115081295,
+          "cold_boot_app_seconds": 235.0732942468021,
+          "repeat_dispatch_seconds": 0.014009227976202965,
+          "repeat_ready_seconds": 9.6436426138971,
+          "repeat_first_pwm_seconds": 9.656612566905096,
+          "ready_to_pwm_seconds": 0.012969953007996082
+        },
+        "total_seconds": 256.6494734280277,
+        "pwm_sequences": [
+          275,
+          277,
+          291,
+          298
+        ]
+      },
+      {
+        "run": 2,
+        "result": "PASS",
+        "timings": {
+          "cold_ready_seconds": 233.45297745009884,
+          "cold_boot_app_seconds": 243.10937665216625,
+          "repeat_dispatch_seconds": 0.020980453118681908,
+          "repeat_ready_seconds": 7.380450346041471,
+          "repeat_first_pwm_seconds": 7.385047211078927,
+          "ready_to_pwm_seconds": 0.004596865037456155
+        },
+        "total_seconds": 268.8970611069817,
+        "pwm_sequences": [
+          275,
+          277,
+          291,
+          298
+        ]
+      },
+      {
+        "run": 3,
+        "result": "PASS",
+        "timings": {
+          "cold_ready_seconds": 232.27522088307887,
+          "cold_boot_app_seconds": 242.4726382859517,
+          "repeat_dispatch_seconds": 0.026827270863577724,
+          "repeat_ready_seconds": 9.094214926008135,
+          "repeat_first_pwm_seconds": 9.108165605925024,
+          "ready_to_pwm_seconds": 0.013950679916888475
+        },
+        "total_seconds": 267.6960172280669,
+        "pwm_sequences": [
+          275,
+          277,
+          291,
+          298
+        ]
+      }
+    ],
+    "missing_readiness_negative": "PASS in host regression suite",
+    "original_intermittent_startup_cause": "not isolated; new readiness and phase deadlines verified"
+  },
+  "F3": {
+    "result": "PASS",
+    "host_tests": 8,
+    "qa_original_helper_exits": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "original_trace_validation": [
+      {
+        "file": "pca-stock.jsonl",
+        "decoded_original_frames": 310,
+        "result": "PASS"
+      },
+      {
+        "file": "pca-image.jsonl",
+        "decoded_original_frames": 98,
+        "result": "PASS"
+      }
+    ],
+    "real_qemu_consumer": {
+      "result": "PASS",
+      "open_snapshot_sequences": [
+        2,
+        4,
+        6
+      ],
+      "disconnect_cycles": 3,
+      "actual_consumer_restart_sequences": [
+        8,
+        10
+      ],
+      "layer": "QEMU device, no guest"
+    }
+  },
+  "delivered_image_sha256": "8bd3e452033e0fb97b9432b823990a03b5956409f2836a8785983c867d57b40c",
+  "independent_qa": "pending STE-92 exact-commit recheck",
+  "limits_unchanged": [
+    "STOP in combined reads",
+    "external kernel and modified DTB",
+    "unknown physical Pi variant",
+    "no physical boot/electrical/vehicle/camera/Bluetooth/network acceptance",
+    "other OS service failures not fixed"
+  ]
+}

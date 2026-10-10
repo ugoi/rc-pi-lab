@@ -2,7 +2,7 @@
 """Actual QEMU callback regression: disconnect must not deadlock its main loop.
 This is a device test without a guest; it does not replace the Linux guest test.
 """
-import json,socket,subprocess,time
+import json,socket,subprocess,time,sys
 from pathlib import Path
 qmp=Path('build/bridge-smoke-qmp.sock');pwm=Path('build/bridge-smoke-pwm.sock')
 for path in (qmp,pwm):path.unlink(missing_ok=True)
@@ -34,8 +34,22 @@ try:
   stream.close();s.close();time.sleep(.1)
   assert query('query-status')['running'] is False
  assert snapshots==sorted(set(snapshots)),snapshots
+ # The actual observer must accept a real device snapshot after each restart.
+ consumer_sequences=[]
+ for attempt in range(2):
+  output=Path(f'evidence/bridge-consumer-{attempt}.jsonl')
+  subprocess.run([sys.executable,'scripts/bridge.py',str(pwm),str(output),
+                  '--seconds','0.5'],check=True,timeout=5)
+  observations=[json.loads(line) for line in output.read_text().splitlines()]
+  states=[row for row in observations if 'high_us' in row]
+  assert len(states)==1 and states[0]['event']=='bridge_open',observations
+  assert observations[-1]['bridge']=='disconnected' and observations[-1]['valid'] is False
+  assert not any(row.get('bridge')=='framing_error' for row in observations)
+  consumer_sequences.append(states[0]['seq'])
+  assert query('query-status')['running'] is False
+ assert consumer_sequences==sorted(set(consumer_sequences))
  query('quit');p.wait(timeout=5)
- result={'result':'PASS','open_snapshot_sequences':snapshots,'disconnect_cycles':3,'layer':'QEMU device, no guest'}
+ result={'result':'PASS','open_snapshot_sequences':snapshots,'disconnect_cycles':3,'actual_consumer_restart_sequences':consumer_sequences,'layer':'QEMU device, no guest'}
  Path('evidence/bridge-device-smoke.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 finally:
  if p.poll() is None:

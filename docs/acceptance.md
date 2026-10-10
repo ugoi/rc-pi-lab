@@ -1,5 +1,10 @@
 # Acceptance — virtual Pi3 vertical proof
 
+Historical execution record. Independent QA on 2026-10-10 required corrections
+to extraction, diagnostic startup and malformed bridge input. See
+[the correction report](qa-fixes.md) for the subsequent scope and evidence; the
+original results below are not an unconditional reproduction PASS.
+
 Executed on 2026-10-08, not inferred from source code. Independent QA is organised
 separately by the parent task owner; these are CTO execution results.
 

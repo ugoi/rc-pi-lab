@@ -29,7 +29,7 @@ docker exec --user "$(id -u):$(id -g)" rc-pi-lab-builder /work/scripts/extract-i
 docker exec --user "$(id -u):$(id -g)" rc-pi-lab-builder sh -c \
   'python3 scripts/provision.py && sh scripts/prepare-dtb.sh && sh scripts/test-core.sh'
 docker exec --user "$(id -u):$(id -g)" rc-pi-lab-builder sh -c \
-  'python3 scripts/verify-pypi.py && python3 tests/bridge-smoke.py && python3 scripts/run-diagnostic.py'
+  'python3 scripts/verify-pypi.py && python3 -m unittest discover -s tests -p test_host_tools.py && python3 tests/bridge-smoke.py && python3 scripts/run-diagnostic.py'
 docker exec --user "$(id -u):$(id -g)" rc-pi-lab-builder \
   python3 tests/validate_trace.py evidence/pca-stock.jsonl evidence/boot-stock.log
 # QEMU has stopped. This converts the intermediate rootfs in place into a full SD.
@@ -39,7 +39,11 @@ docker exec --user "$(id -u):$(id -g)" rc-pi-lab-builder python3 scripts/run-ima
 docker exec --user "$(id -u):$(id -g)" -e SNAPSHOT=1 rc-pi-lab-builder python3 scripts/run-image.py
 ```
 
-The first guest run uses a diagnostic init and also executes the device matrix
+Extraction explicitly uses one XZ thread and a 256-MiB decompressor limit inside
+the documented 2-GiB container; no `XZ_DEFAULTS` override is needed.
+
+The first guest run uses a fresh temporary QEMU snapshot of the diagnostic rootfs
+and also executes the device matrix
 and live bridge reconnect test. The second uses the complete partitioned image,
 normal systemd, and the installed lab service. It powers off on success. Kernel
 and modified DTB are loaded externally by QEMU in both cases. A test timeout or
@@ -49,9 +53,46 @@ failed assertion is a failure, never acceptance. Raw serial/device logs are in
 The default execution has no network or USB camera forwarding. No socket binds
 outside the checkout: the PWM bridge uses local Unix sockets only. Stop an
 interactive guest cleanly from its console (`poweroff` for systemd). The bounded
-test harness handles shutdown; after an interrupted diagnostic guest run,
+test harness handles shutdown and discards diagnostic writes; after an interrupted
+manual guest run without a snapshot,
 `scripts/update-guest.py` replays/checks its filesystem before changing lab files.
 Stop the builder with `docker stop rc-pi-lab-builder` when finished.
+
+## Diagnostic and observer failure contract
+
+`python3 scripts/run-diagnostic.py` reads serial and PWM streams concurrently.
+The original app's `ANGLE 0 monotonic_ns …` line proves that imports and ServoKit
+initialisation finished; the app is not patched to manufacture readiness. The
+second launch also records an exact shell-dispatch marker. Its 60-second startup
+budget includes dispatch and app readiness; a separate 45-second budget covers
+PWM, reconnect and completion. The cold readiness limit is 600 seconds; all phases
+share a 900-second overall deadline (plus at most 17 seconds to stop readers/QEMU).
+Missing readiness, EOF, invalid frames and guest failures fail with the phase and
+last observation. `evidence/bridge-test.json` records PASS/FAIL and measured host
+receipt times. These are emulator measurements, not real-Pi performance.
+
+A new bridge connection must produce `bridge_open`; the first accepted repeat PWM
+must be a later `stop` event. Reconnect snapshots and subsequent samples must have
+increasing sequences, avoiding reuse of earlier app events. Both app starts must
+report PASS. Each invocation boots a fresh snapshot, leaving the prepared rootfs
+unchanged. Save `evidence/boot-stock.log`, `pca-stock.jsonl` and `bridge-test.json`
+before another invocation, since those diagnostic output filenames are reused.
+For the three-run regression, execute `sh tests/repeat-diagnostic.sh` inside the
+same container before SD assembly. It stops on the first failure, saves each run
+in `evidence/diagnostic-{1,2,3}` and verifies the rootfs hash after every run. It
+refuses to overwrite an existing run directory.
+
+`python3 scripts/bridge.py build/pwm.sock output.jsonl --seconds 30` is a bounded
+observer, not a vehicle safety controller. It accepts the exact fields emitted by
+`model/pca9685.c`: integer sequence/time/register metadata, a known event, finite
+positive period, and exactly 16 finite numeric pulse widths within that period.
+Booleans, strings, nulls, missing/unknown fields, NaN/Infinity, stale sequences and
+frames over 4096 bytes are rejected. `framing_error` sets `valid:false`; the next
+valid complete frame may restore observations. Oversized unterminated frames end
+the connection. EOF, socket error or the total time limit always emits
+`disconnected` with `valid:false`; a partial final frame is also invalid. Restart
+the command explicitly to reconnect and get a new snapshot. No automatic retries,
+old-position hold or ESC fail-safe is implied. See [QA corrections](docs/qa-fixes.md).
 
 ## View measured output
 

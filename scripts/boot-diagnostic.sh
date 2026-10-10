@@ -2,7 +2,7 @@
 set -eu
 cd /work
 exec build/qemu-out/qemu-system-aarch64 \
-  -M raspi3b -m 1G -smp 4 -nographic -monitor none \
+  -M raspi3b -m 1G -smp 4 -snapshot -nographic -monitor none \
   -kernel build/boot/kernel8.img -dtb build/boot/qemu-rpi3.dtb \
   -drive file=build/rootfs.img,format=raw,if=sd \
   -append 'console=ttyAMA0,115200 root=/dev/mmcblk0 rootwait rw earlycon=pl011,mmio32,0x3f201000 init=/rc-init panic=-1' \
