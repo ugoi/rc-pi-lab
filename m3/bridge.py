@@ -112,7 +112,10 @@ class State:
             k: v for k, v in self.pending.items() if time.monotonic() - v[0] < 2
         }
         try:
-            raw = (("\n" if op == "hello" else "") + json.dumps(c) + "\n").encode()
+            # Browser attribution stays in host logs/pending; sequence+epoch bind
+            # the guest ACK to it. Avoid echoing UI metadata through the UART.
+            wire = {k: c[k] for k in ("epoch", "seq", "op", "steer", "throttle")}
+            raw = (("\n" if op == "hello" else "") + json.dumps(wire, separators=(",", ":")) + "\n").encode()
             if self.serial.send(raw, socket.MSG_DONTWAIT) != len(raw):
                 raise OSError("partial serial send")
             log("serial_tx", command=c)

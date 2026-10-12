@@ -16,3 +16,11 @@ assert.equal(statusView(null).title, 'VERBINDUNG UNTERBROCHEN');
 assert.match(statusView(null).reason, /Keine aktuellen Fahrzeugdaten/);
 assert.equal(statusView({...s, mode:'STOPPED', telemetry:{mode:'STOPPED',source_status:'fresh'}}).canArm,true);
 console.log('UI_STATUS_PASS: stale ARMED, startup, handshake, timeout, connection loss, explicit rearm');
+
+// Fresh neutral ACKs restore readiness, but must not hide the latched fault.
+const recovered = {readiness:'ready', mode:'STOPPED', reason:'late_guest_ack', telemetry_age_s:.1,
+  telemetry:{mode:'STOPPED', reason:'late_guest_ack',source_status:'fresh'}};
+assert.equal(statusView(recovered).title, 'SICHERHEITSSTOPP');
+assert.match(statusView(recovered).reason, /zu spät/);
+assert.equal(statusView(recovered).canArm, true);
+console.log('UI_LATE_ACK_PASS: fresh neutral does not erase latched stop reason');

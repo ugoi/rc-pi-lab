@@ -66,3 +66,14 @@ ACK establishes readiness; explicit arming is still required. Pending
 writes are bounded and use nonblocking sends; backpressure disarms. Physics
 telemetry loss also latches the bridge. The shared desktop is an access path,
 not a test of the user's Mac/Safari client.
+
+## F3 UART output and current stop display
+
+The guest processes each command through the unchanged Adafruit/I2C path before
+emitting one compact ACK. `received_ns` records guest monotonic receipt;
+`guest_ns` records the ACK preparation point. Browser client/timestamp metadata
+stays in host `serial_tx`/`ack_correlated` logs, joined by epoch and sequence.
+No verbose pre-application echo is sent over the UART. Late ACKs remain invalid
+for liveness; no watchdog values changed. On a latched stop the UI clears and
+disables its input sliders, preserves the reason after fresh neutral replies,
+and requires an explicit Start. This does not imply real hardware shutdown.

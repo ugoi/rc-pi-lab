@@ -90,6 +90,9 @@ setInterval(async () => {
       seq = 0;
       neutral();
     }
+    if (state.mode !== "ARMED") neutral();
+    $("#throttle").disabled = state.mode !== "ARMED";
+    $("#steer").disabled = state.mode !== "ARMED";
     const view = statusView(state);
     $("#status").textContent = view.title;
     $("#reason").textContent = view.reason;

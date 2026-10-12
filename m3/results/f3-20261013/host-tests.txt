@@ -1,0 +1,27 @@
+test_fresh_drive_and_explicit_stop (test_actuator_state.Tests.test_fresh_drive_and_explicit_stop) ... ok
+test_invalid_clock_or_actuator_stops (test_actuator_state.Tests.test_invalid_clock_or_actuator_stops) ... ok
+test_missing_file_cannot_reuse_previous_input (test_actuator_state.Tests.test_missing_file_cannot_reuse_previous_input) ... ok
+test_stale_armed_input_reports_actual_stop (test_actuator_state.Tests.test_stale_armed_input_reports_actual_stop) ... ok
+test_all_hello_paths_share_spacing (test_bridge.Tests.test_all_hello_paths_share_spacing) ... ok
+test_arm_waits_for_neutral_ack (test_bridge.Tests.test_arm_waits_for_neutral_ack) ... ok
+test_boot_does_not_flood_serial (test_bridge.Tests.test_boot_does_not_flood_serial) ... ok
+test_browser_loss_latches (test_bridge.Tests.test_browser_loss_latches) ... ok
+test_calibration (test_bridge.Tests.test_calibration) ... ok
+test_drive_comes_from_pwm_not_target (test_bridge.Tests.test_drive_comes_from_pwm_not_target) ... ok
+test_expired_ticket_rejected (test_bridge.Tests.test_expired_ticket_rejected) ... ok
+test_freshness_ticket_once_only (test_bridge.Tests.test_freshness_ticket_once_only) ... ok
+test_handshake_retry_is_bounded (test_bridge.Tests.test_handshake_retry_is_bounded) ... ok
+test_held_pwm_does_not_keep_guest_alive (test_bridge.Tests.test_held_pwm_does_not_keep_guest_alive) ... ok
+test_invalid_pwm_latches (test_bridge.Tests.test_invalid_pwm_latches) ... ok
+test_no_send_before_guest_has_configured_uart (test_bridge.Tests.test_no_send_before_guest_has_configured_uart) ... ok
+test_nonblocking_backpressure_stops (test_bridge.Tests.test_nonblocking_backpressure_stops) ... ok
+test_readiness_beacon_is_not_command_liveness (test_bridge.Tests.test_readiness_beacon_is_not_command_liveness) ... ok
+test_startup_deadline_and_handshake_exhaustion_are_visible (test_bridge.Tests.test_startup_deadline_and_handshake_exhaustion_are_visible) ... ok
+test_unmatched_pwm_cannot_drive (test_bridge.Tests.test_unmatched_pwm_cannot_drive) ... ok
+test_idle_beacons_allow_new_bridge_epoch (test_guest_handshake.TestGuest.test_idle_beacons_allow_new_bridge_epoch) ... ok
+test_apply_before_blocked_output (test_guest_output_pressure.OutputPressure.test_apply_before_blocked_output) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 2.613s
+
+OK

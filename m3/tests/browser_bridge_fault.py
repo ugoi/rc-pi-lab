@@ -21,7 +21,7 @@ result = {
 
 def browser(*args):
     r = subprocess.run(
-        ["agent-browser", "--session", session, *args], text=True, capture_output=True
+        ["agent-browser", "--session", session, *args], text=True, capture_output=True, timeout=20
     )
     with (evidence / ("browser-fault-console-" + label + ".txt")).open("a") as f:
         f.write(repr(args) + "\n" + r.stdout + r.stderr + "\n")
@@ -123,9 +123,19 @@ try:
         "screenshot", str(evidence / ("browser-bridge-reconnected-" + label + ".png"))
     )
     result["result"] = "PASS"
+except Exception as error:
+    result["error"] = repr(error)
+    raise
 finally:
+    recording_failure = None
     if recording:
-        browser("record", "stop")
+        try:
+            browser("record", "stop")
+        except Exception as error:
+            result["recording_error"] = repr(error)
+            if result["result"] == "PASS":
+                result["result"] = "FAIL"
+                recording_failure = error
     result["physics_during_kill"] = rows
     (evidence / ("browser-bridge-fault-" + label + ".json")).write_text(
         json.dumps(result, indent=2)
@@ -138,3 +148,6 @@ finally:
         },
         flush=True,
     )
+
+    if recording_failure is not None:
+        raise RuntimeError("video recording failed; control evidence saved") from recording_failure

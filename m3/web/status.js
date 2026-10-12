@@ -18,7 +18,8 @@ function statusView(s) {
     invalid_actuator_data: 'Ungültige Antriebsdaten. Die Physik bremst.',
     browser_timeout: 'Die Browsersteuerung ist ausgefallen. Zum Weiterfahren erneut starten.',
     browser_stop: 'Mit STOP angehalten. Zum Weiterfahren erneut starten.',
-    guest_liveness_timeout: 'Das Gastprogramm antwortet nicht mehr. Antrieb gesperrt.',
+    guest_liveness_timeout: 'Das Gastprogramm antwortet nicht mehr. Antrieb gesperrt; erst nach frischer Antwort erneut starten.',
+    late_guest_ack: 'Die Antwort des Pi kam zu spät. Sicherheitsstopp; Gas ist null. Erst nach frischer Antwort erneut starten.',
     guest_timeout: 'Der Gast hat wegen ausbleibender Befehle auf Neutral geschaltet.',
     physics_timeout: 'Die Fahrzeugsimulation antwortet nicht mehr. Start bleibt gesperrt.',
     reversal_braking: 'Vor dem Richtungswechsel wird bis zum Stillstand gebremst.',
@@ -27,6 +28,7 @@ function statusView(s) {
   const reason = reasons[t.reason] || reasons[s.reason];
   if (t.mode === 'ARMED' && s.mode === 'ARMED') return {title: 'FAHRBEREIT', reason: reason || 'Gas und Lenkung sind aktiv. STOP hält an und sperrt den Antrieb.', canArm: false};
   if (s.mode === 'ARMING') return {title: 'NEUTRAL WIRD BESTÄTIGT', reason: 'Die Steuerung prüft Neutral und wartet die Einschaltzeit ab.', canArm: false};
-  return {title: 'GESTOPPT', reason: reason || 'Pi und Simulation bereit. Mit Start die neutrale Steuerung freigeben.', canArm: s.readiness === 'ready' && t.source_status === 'fresh'};
+  const fault = ['guest_liveness_timeout', 'late_guest_ack', 'guest_timeout', 'physics_timeout', 'browser_timeout', 'invalid_pwm', 'missing_pwm'].includes(s.reason);
+  return {title: fault ? 'SICHERHEITSSTOPP' : 'GESTOPPT', reason: reason || 'Pi und Simulation bereit. Mit Start die neutrale Steuerung freigeben.', canArm: s.readiness === 'ready' && t.source_status === 'fresh'};
 }
 if (typeof module !== 'undefined') module.exports = {statusView};

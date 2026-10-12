@@ -64,6 +64,7 @@ class ServoKit:
                 )
                 send("a" * 32, 1, "hello")
                 ack = event("ack")
+                self.assertLessEqual(ack["received_ns"], ack["guest_ns"])
                 self.assertEqual(
                     (ack["epoch"], ack["armed"], ack["throttle"]), ("a" * 32, False, 0)
                 )

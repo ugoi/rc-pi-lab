@@ -84,13 +84,7 @@ while True:
         line, buf = buf.split(b"\n", 1)
         try:
             c = json.loads(line)
-            print(
-                "M3 "
-                + json.dumps(
-                    {"event": "received", "command": c, "guest_ns": time.monotonic_ns()}
-                ),
-                flush=True,
-            )
+            received_ns = time.monotonic_ns()
             if c["op"] == "hello":
                 if not isinstance(c["epoch"], str) or len(c["epoch"]) != 32:
                     raise ValueError()
@@ -133,6 +127,7 @@ while True:
                 + json.dumps(
                     {
                         "event": "ack",
+                        "received_ns": received_ns,
                         "epoch": epoch,
                         "seq": seq,
                         "op": op,
@@ -140,7 +135,7 @@ while True:
                         "throttle": t,
                         "armed": armed,
                         "guest_ns": time.monotonic_ns(),
-                    }
+                    }, separators=(",", ":")
                 ),
                 flush=True,
             )

@@ -1,0 +1,14 @@
+F
+======================================================================
+FAIL: test_apply_before_blocked_output (__main__.OutputPressure.test_apply_before_blocked_output)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/hermes/.paperclip/instances/default/projects/2a33e34f-0128-4c43-88e8-26cbfe843636/b25d62fd-5b49-4ad8-a2c9-9af5dcc52c5e/_default/rc-pi-lab/m3/tests/test_guest_output_pressure.py", line 51, in test_apply_before_blocked_output
+    self.assertTrue(marker.exists(),'command blocked by output before applying ServoKit writes')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : command blocked by output before applying ServoKit writes
+
+----------------------------------------------------------------------
+Ran 1 test in 0.805s
+
+FAILED (failures=1)
