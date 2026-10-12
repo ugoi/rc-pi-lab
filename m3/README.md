@@ -32,7 +32,7 @@ stopped. No host rebuild, production-service restart or public listener.
    **Pi 3 · Offroad Labor** tab. It is the actual shared Cloak desktop; coordinate
    before taking control. Alternatively forward privately from your computer:
    `ssh -N -L 18090:127.0.0.1:18090 agent-services`, then open that local URL.
-5. Click **Start / neutral armen**, wait for ARMED, then use gas and steering.
+5. Click **Start / neutral armen**, wait for **FAHRBEREIT**, then use gas and steering.
    **STOP** or Space stops and disarms. Close/hidden tabs also request stop;
    heartbeat loss independently stops. Reopen/reconnect requires manual arming.
 6. Shut down only this lab: `docker compose -f m3/compose.yaml down` (or
@@ -110,3 +110,50 @@ claim, a physical Pi benchmark, or the servo's complete mechanical settling time
 `python3 m3/summarize.py` reports those samples separately from accepted guest
 round-trip times and Webots simulation/wall-time factor. Safety deadlines use
 monotonic clocks regardless of wall-clock adjustment.
+
+## F1/F2 corrections (STE-112, 2026-10-12)
+
+During Pi boot the bridge now **waits for guest readiness before any handshake**.
+Pre-boot host input could leave the emulated PL011 receive FIFO full during the
+Linux driver's bounded startup drain. The guest announces readiness after raw
+UART setup and neutral I2C writes, repeating it while disarmed so a replacement
+bridge can connect. These beacons do not count as fresh command ACKs. All three
+maximum Hello attempts share one host-wall-time spacing gate (at least 1 s).
+No retries until success or manual console priming are part of the start path.
+
+The page displays **PI STARTET**, **VERBINDUNG WIRD GEPRÜFT**, **GESTOPPT** and
+**FAHRBEREIT**, with German timeout/disconnection explanations. Start is enabled
+only with fresh guest/PWM and physics data. A failed HTTP connection clears the
+active display and controls; it does not pretend to know the current vehicle
+speed. Webots independently records current `mode`, `reason`, `source_status`.
+`source` remains the historical input for correlation, including stale ARMED
+commands. Bridge expiry reports `STOPPED / bridge_timeout / stale`; reversal
+braking cannot overwrite that fault reason. The unchanged physics watchdog is
+still simulation-only.
+
+Additional targeted checks (host tests are not live I2C evidence):
+
+```sh
+python3 m3/tests/test_bridge.py
+python3 m3/tests/test_actuator_state.py
+python3 m3/tests/test_guest_handshake.py  # actual app protocol via PTY, ServoKit stub
+node m3/tests/test_status.cjs
+python3 m3/tests/wait_ready.py           # one real startup, 600 s maximum
+python3 m3/tests/browser_bridge_fault.py # actual browser gas, SIGKILL bridge, recovery
+# Fault runtime only: export M3_TESTING=1 before compose up.
+python3 m3/tests/live_matrix.py --case freeze --drive-throttle 1
+python3 m3/tests/restart_guest.py
+python3 m3/tests/reset_world.py
+python3 m3/tests/live_matrix.py --case crash --drive-throttle 1
+python3 m3/tests/idle_after_crash.py      # 60 s, exit 77 and idle PID1 marker
+python3 m3/tests/restart_guest.py
+```
+
+Set the documented `M3_URL`, container names and `M3_BROWSER_SESSION` for your
+isolated QA checkout. Release the own browser tab to `about:blank` before HTTP
+matrix cases. `restart_bridge.py` and the browser fault helper preserve the
+container's configured fault gate. A guest crash emits `M3_APP_EXIT code=77` then
+`M3_IDLE_INIT`; init keeps Linux alive without a shell, auto-restart or auto-arm.
+Every successful full restart must show a new epoch, fresh neutral ACK and PWM.
+See `m3/results/qa-fixes-20261012` and the native correction report for all attempts,
+source diagnosis, delivered pins, raw evidence and the independent QA boundary.

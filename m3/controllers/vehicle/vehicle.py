@@ -1,10 +1,13 @@
 """Webots physics consumer. No browser command or pose teleportation API here."""
 
 from controller import Supervisor
-import json, math, time, uuid
+import json, math, sys, time, uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "m3"))
+from actuator_state import effective_control
+
 RUN = ROOT / "build/m3"
 EVID = ROOT / "evidence/m3"
 p = json.loads((ROOT / "m3/parameters.json").read_text())
@@ -39,27 +42,21 @@ reverse_wait = 0
 direction = 0
 while robot.step(step) != -1:
     now = time.monotonic()
-    reason = "bridge_timeout"
-    active = False
-    throttle = steer = 0
+    c = None
     try:
         c = json.loads((RUN / "actuators.json").read_text())
-        if 0 <= now - c["wall"] <= p["bridge_timeout_s"] and c["mode"] == "ARMED":
-            active = True
-            reason = "armed"
-            throttle = c["throttle"]
-            steer = c["steer"]
-        else:
-            reason = c.get("reason", "stopped")
-    except (OSError, ValueError, KeyError):
+    except (OSError, ValueError):
         pass
+    control = effective_control(c, now, p["bridge_timeout_s"])
+    active, reason = control["active"], control["reason"]
+    throttle, steer = control["throttle"], control["steer"]
     speed = math.sqrt(sum(v * v for v in car.getVelocity()[:3]))
     desired_direction = (throttle > 0) - (throttle < 0)
     # Reversing first brakes to rest; explicit neutral dwell before opposite drive.
     if desired_direction and direction and desired_direction != direction:
         reverse_wait = robot.getTime() + 0.3
         direction = 0
-    if robot.getTime() < reverse_wait or (direction == 0 and speed > 0.05):
+    if active and (robot.getTime() < reverse_wait or (direction == 0 and speed > 0.05)):
         throttle = 0
         reason = "reversal_braking"
     elif desired_direction:
@@ -91,7 +88,9 @@ while robot.step(step) != -1:
         drive=throttle,
         steer=steer,
         reason=reason,
-        source=c if "c" in locals() else None,
+        mode=control["mode"],
+        source_status=control["source_status"],
+        source=c,  # historical input; only mode/reason above describe current output
     )
     if now - last_log >= 0.08:
         last_log = now

@@ -63,6 +63,9 @@ class State:
         self.connected = False
         self.ready = False
         self.hello_attempts = 0
+        self.guest_announced = False
+        self.last_hello_tx = float("-inf")
+        self.started_at = time.monotonic()
 
     def stop(self, reason):
         if self.mode != "STOPPED" or self.reason != reason:
@@ -72,11 +75,27 @@ class State:
         self.target = (0, 0)
         self.need_stop = True
 
+    def announce_ready(self):
+        # Beacons on an established link are informational, not new handshakes.
+        if not self.guest_announced:
+            self.guest_announced = True
+            self.stop("guest_ready_rearm_required")
+            self.send("hello")
+
     def send(self, op, steer=0, throttle=0):
         if self.serial is None:
             return
+        now = time.monotonic()
         if op == "hello":
+            if (
+                not self.guest_announced
+                or self.hello_attempts >= 3
+                or now - self.last_hello_tx < 1.0
+            ):
+                return
             self.hello_attempts += 1
+            self.last_hello_tx = now
+        self.last_tx = now
         self.command_seq += 1
         c = dict(
             epoch=EPOCH,
@@ -145,10 +164,12 @@ def serial_reader():
             with lock:
                 S.serial = sock
                 S.ready = False
+                S.guest_announced = False
                 S.hello_attempts = 0
                 S.pending = {}
+                S.ack = None
+                S.guest = 0
                 S.stop("serial_connected_rearm_required")
-                S.send("hello")
             with sock, sock.makefile("rb") as f:
                 while True:
                     line = f.readline(4098)
@@ -168,9 +189,9 @@ def serial_reader():
                         continue
                     with lock:
                         if row.get("event") == "ready":
-                            S.hello_attempts = 0
-                            S.stop("guest_ready_rearm_required")
-                            S.send("hello")
+                            # Repeated idle beacons support a restarted bridge.
+                            # They must not reset the attempt budget or re-arm.
+                            S.announce_ready()
                             continue
                         if row.get("epoch") != EPOCH:
                             continue
@@ -216,6 +237,8 @@ def serial_reader():
         except OSError as e:
             with lock:
                 S.serial = None
+                S.ready = False
+                S.guest_announced = False
                 S.stop("serial_disconnected")
             log("serial_error", error=str(e))
             time.sleep(0.5)
@@ -262,10 +285,10 @@ def tick():
         if (
             not S.ready
             and S.serial is not None
+            and S.guest_announced
             and S.hello_attempts < 3
-            and now - S.last_tx >= 1.0
+            and now - S.last_hello_tx >= 1.0
         ):
-            S.last_tx = now
             S.send("hello")
         if S.need_stop and S.ready:
             S.send("stop")
@@ -275,7 +298,6 @@ def tick():
             and now - S.last_tx >= 0.15
             and not any(now - v[0] < 0.5 for v in S.pending.values())
         ):
-            S.last_tx = now
             if S.mode == "ARMING":
                 S.send("arm")
             elif S.mode == "ARMED":
@@ -330,6 +352,25 @@ def tick():
         )
 
 
+def readiness():
+    now = time.monotonic()
+    if S.serial is None:
+        return "disconnected"
+    if not S.ready:
+        if now - S.started_at >= 600:
+            return "timeout"
+        if not S.guest_announced:
+            return "booting"
+        if S.hello_attempts >= 3 and now - S.last_hello_tx > P["guest_timeout_s"]:
+            return "handshake_timeout"
+        return "handshake"
+    if now - S.guest > P["guest_timeout_s"]:
+        return "unresponsive"
+    if S.pwm is None:
+        return "missing_pwm"
+    return "ready"
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -357,6 +398,8 @@ class Handler(BaseHTTPRequestHandler):
                         ticket=issue_ticket(),
                         mode=S.mode,
                         reason=S.reason,
+                        readiness=readiness(),
+                        startup_elapsed_s=time.monotonic() - S.started_at,
                         guest_age_s=time.monotonic() - S.guest,
                         pwm=S.pwm,
                         ack=S.ack,
@@ -365,8 +408,8 @@ class Handler(BaseHTTPRequestHandler):
                         parameters=P,
                     ),
                 )
-        elif self.path in ("/", "/app.js"):
-            name = "index.html" if self.path == "/" else "app.js"
+        elif self.path in ("/", "/app.js", "/status.js"):
+            name = "index.html" if self.path == "/" else self.path[1:]
             self.reply(
                 200,
                 (ROOT / "m3/web" / name).read_bytes(),
@@ -432,8 +475,9 @@ class Handler(BaseHTTPRequestHandler):
                 if op == "arm":
                     if (
                         S.serial is None
+                        or not S.ready
                         or S.pwm is None
-                        or time.monotonic() - S.guest > 2
+                        or time.monotonic() - S.guest > P["guest_timeout_s"]
                     ):
                         raise ValueError("guest not ready")
                     if abs(steer) > 0 or abs(throttle) > 0:

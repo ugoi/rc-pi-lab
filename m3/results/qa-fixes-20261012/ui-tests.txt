@@ -1,0 +1,1 @@
+UI_STATUS_PASS: stale ARMED, startup, handshake, timeout, connection loss, explicit rearm

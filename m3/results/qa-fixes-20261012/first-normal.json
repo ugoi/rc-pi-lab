@@ -1,0 +1,13 @@
+{
+  "first_normal_start_s": 278.0388413669989,
+  "bridge_stop_s": 1.2282198539996898,
+  "speed_before_bridge_failure_m_s": 0.4972773607462621,
+  "last_stop_state": {
+    "mode": "STOPPED",
+    "reason": "bridge_timeout",
+    "source_status": "stale",
+    "speed_m_s": 0.02936133905837108
+  },
+  "browser_disconnected": "VERBINDUNG UNTERBROCHEN",
+  "browser_reconnected": "GESTOPPT"
+}

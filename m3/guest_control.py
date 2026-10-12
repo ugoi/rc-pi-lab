@@ -26,18 +26,27 @@ seq = -1
 armed = False
 last = time.monotonic()
 previous = (0, 0)
-print(
-    "M3 "
-    + json.dumps(
-        {
-            "event": "ready",
-            "pid": os.getpid(),
-            "stdin": os.readlink("/proc/self/fd/" + str(input_fd)),
-            "guest_ns": time.monotonic_ns(),
-        }
-    ),
-    flush=True,
-)
+
+
+def announce_ready():
+    # Only after UART raw mode and neutral I2C writes. Repeat while disarmed
+    # so a new bridge can discover readiness without writing during Linux boot.
+    print(
+        "M3 "
+        + json.dumps(
+            {
+                "event": "ready",
+                "pid": os.getpid(),
+                "stdin": os.readlink("/proc/self/fd/" + str(input_fd)),
+                "guest_ns": time.monotonic_ns(),
+            }
+        ),
+        flush=True,
+    )
+
+
+announce_ready()
+last_beacon = time.monotonic()
 buf = b""
 while True:
     if time.monotonic() - last > 0.6 and armed:
@@ -56,6 +65,9 @@ while True:
             ),
             flush=True,
         )
+    if not armed and time.monotonic() - last_beacon >= 1.0:
+        announce_ready()
+        last_beacon = time.monotonic()
     if not select.select([input_fd], [], [], 0.05)[0]:
         continue
     part = os.read(input_fd, 1024)

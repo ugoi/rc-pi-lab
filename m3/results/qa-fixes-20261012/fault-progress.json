@@ -1,0 +1,12 @@
+{
+  "fault_start_s": 251.3952059989988,
+  "freeze": {
+    "case": "freeze",
+    "start": 13270.902212229,
+    "fault_drive_throttle": 1.0,
+    "speed_before_fault_m_s": 0.5554303944813452,
+    "stop_s": 1.2395697540014226,
+    "held_pwm_us": 1995.92,
+    "result": "PASS"
+  }
+}

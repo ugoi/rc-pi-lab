@@ -51,7 +51,7 @@ command("stop")
 time.sleep(0.2)
 command("arm")
 drive(1.2, 0)
-drive(1, 0.6)
+drive(1, 1)
 assert state()["telemetry"]["speed_m_s"] > 0.1
 script = 'import os,signal; [(os.kill(int(p),signal.SIGKILL)) for p in os.listdir("/proc") if p.isdigit() and int(p)!=os.getpid() and open("/proc/"+p+"/comm").read().strip()=="python3" and b"m3/bridge.py" in open("/proc/"+p+"/cmdline","rb").read()]'
 start = time.monotonic()
@@ -79,6 +79,9 @@ while time.monotonic() - start < 2.5:
 else:
     raise AssertionError("bridge kill stop deadline")
 stop_s = time.monotonic() - start
+assert t["reason"] == "bridge_timeout", t["reason"]
+assert t["mode"] == "STOPPED" and t["source_status"] == "stale"
+assert t["source"]["mode"] == "ARMED"  # explicitly historical, not current
 subprocess.run(
     [
         "docker",
@@ -86,8 +89,6 @@ subprocess.run(
         "-d",
         "--user",
         "1001:1001",
-        "-e",
-        "M3_TESTING=1",
         os.environ.get("M3_GUEST_CONTAINER", "rc-pi-m3-qemu"),
         "sh",
         "-c",
@@ -99,7 +100,11 @@ end = time.monotonic() + 5
 while True:
     try:
         d = state()
-        break
+        if d["readiness"] == "ready" and d["guest_age_s"] < 0.5:
+            break
+        if time.monotonic() > end:
+            raise AssertionError("new bridge readiness deadline")
+        time.sleep(0.1)
     except Exception:
         if time.monotonic() > end:
             raise

@@ -1,0 +1,106 @@
+{
+  "final_normal_start": {
+    "attempt": "05-final-normal",
+    "deadline_s": 600,
+    "result": "PASS",
+    "wall_s": 222.19926414099973,
+    "epoch": "29c5aeae106348b7a2d6d7ff5075e6b6"
+  },
+  "final_browser_bridge_fault": {
+    "result": "PASS",
+    "case": "browser_bridge_kill",
+    "client": "Agent Browser attached to existing Cloak CDP",
+    "stop_s": 1.1602401449999888,
+    "ui_disconnected": "VERBINDUNG UNTERBROCHEN",
+    "ui_feed": "LETZTER STAND",
+    "ui_reconnected": "GESTOPPT"
+  },
+  "speed_before_bridge_kill": 0.5554339139530462,
+  "effective_stop": {
+    "mode": "STOPPED",
+    "reason": "bridge_timeout",
+    "source_status": "stale",
+    "speed_m_s": 0.029361339057817813
+  },
+  "explicit_rearm_required": true,
+  "faults": {
+    "readiness": [
+      {
+        "attempt": "02-fault-start",
+        "deadline_s": 600,
+        "result": "PASS",
+        "wall_s": 251.3952059989988,
+        "epoch": "1ac5a5b9a385409293fb940198dd5a52"
+      }
+    ],
+    "tests": [
+      {
+        "case": "crash",
+        "start": 13549.486884429,
+        "fault_drive_throttle": 1.0,
+        "speed_before_fault_m_s": 0.5554303944573751,
+        "stop_s": 1.3039475059995311,
+        "held_pwm_us": 1995.92,
+        "result": "PASS"
+      },
+      {
+        "case": "freeze",
+        "start": 13270.902212229,
+        "fault_drive_throttle": 1.0,
+        "speed_before_fault_m_s": 0.5554303944813452,
+        "stop_s": 1.2395697540014226,
+        "held_pwm_us": 1995.92,
+        "result": "PASS"
+      },
+      {
+        "case": "motion",
+        "start": 13870.965075416,
+        "fault_drive_throttle": 0.6,
+        "stop_s": 0.15571341199938615,
+        "result": "PASS"
+      },
+      {
+        "case": "stale",
+        "start": 13880.448245773,
+        "fault_drive_throttle": 0.6,
+        "result": "PASS"
+      }
+    ],
+    "restarts": [
+      {
+        "result": "READY_STOPPED",
+        "wall_s": 240.59200539000085,
+        "previous_epoch": "1ac5a5b9a385409293fb940198dd5a52",
+        "new_epoch": "c5c497269b584a3baf0db6a483ce5e70",
+        "neutral_ack": true
+      },
+      {
+        "result": "READY_STOPPED",
+        "wall_s": 223.66105943500042,
+        "previous_epoch": "c5c497269b584a3baf0db6a483ce5e70",
+        "new_epoch": "e438011e50894f7d9a34f4d5a42a3fbb",
+        "neutral_ack": true
+      }
+    ],
+    "idle": [
+      {
+        "result": "PASS",
+        "wall_s": 60.23463404300128,
+        "init": "M3_IDLE_INIT after exit 77"
+      }
+    ],
+    "audit_631_unmodified_count": 3
+  },
+  "final_correlation": {
+    "moving_samples": 21,
+    "correlated_ack_samples": 21,
+    "hello_spacing_and_no_pre_ready_tx": true,
+    "browser_to_physics_s": {
+      "samples": 9,
+      "median": 0.227921630859375,
+      "p95": 0.329702880859375,
+      "max": 0.329702880859375
+    },
+    "median_sim_factor": 0.9712096048178654
+  }
+}

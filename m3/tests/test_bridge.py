@@ -1,4 +1,5 @@
 import importlib.util, json, os, unittest, time, tempfile
+from unittest.mock import patch
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
@@ -76,7 +77,24 @@ class Tests(unittest.TestCase):
     def test_boot_does_not_flood_serial(self):
         b.tick()
         b.tick()
-        self.assertEqual([c["op"] for c in b.S.serial.messages], ["hello"])
+        self.assertEqual(b.S.serial.messages, [])
+
+    def test_no_send_before_guest_has_configured_uart(self):
+        b.S.send("hello")
+        self.assertEqual(b.S.serial.messages, [])
+
+    def test_all_hello_paths_share_spacing(self):
+        s = b.S
+        with patch.object(b.time, "monotonic", return_value=100):
+            s.announce_ready()  # serial reader's readiness path
+            b.tick()  # timer path immediately afterward
+            s.send("hello")
+        with patch.object(b.time, "monotonic", return_value=100.999):
+            s.send("hello")
+        self.assertEqual(len(s.serial.messages), 1)
+        with patch.object(b.time, "monotonic", return_value=101):
+            b.tick()
+        self.assertEqual(len(s.serial.messages), 2)
 
     def test_nonblocking_backpressure_stops(self):
         s = self.arm()
@@ -97,11 +115,33 @@ class Tests(unittest.TestCase):
         self.assertEqual(s.mode, "ARMING")
 
     def test_handshake_retry_is_bounded(self):
-        for _ in range(12):
-            b.S.last_tx = 0
-            b.tick()
+        b.S.guest_announced = True
+        for second in range(100, 112):
+            with patch.object(b.time, "monotonic", return_value=second):
+                b.S.announce_ready()  # repeat beacons cannot replenish retries
+                b.tick()
         self.assertEqual(len(b.S.serial.messages), 3)
         self.assertTrue(all(c["op"] == "hello" for c in b.S.serial.messages))
+
+    def test_readiness_beacon_is_not_command_liveness(self):
+        s = self.arm()
+        s.guest_announced = True
+        s.guest -= 1
+        s.announce_ready()
+        b.tick()
+        self.assertEqual(s.mode, "STOPPED")
+        self.assertEqual(s.reason, "guest_liveness_timeout")
+        self.assertEqual(b.readiness(), "unresponsive")
+
+    def test_startup_deadline_and_handshake_exhaustion_are_visible(self):
+        with patch.object(b.time, "monotonic", return_value=b.S.started_at + 601):
+            self.assertEqual(b.readiness(), "timeout")
+        b.S.guest_announced = True
+        b.S.hello_attempts = 3
+        b.S.last_hello_tx = time.monotonic() - 1
+        self.assertEqual(b.readiness(), "handshake_timeout")
+        b.S.serial = None
+        self.assertEqual(b.readiness(), "disconnected")
 
     def test_freshness_ticket_once_only(self):
         ticket = b.issue_ticket()

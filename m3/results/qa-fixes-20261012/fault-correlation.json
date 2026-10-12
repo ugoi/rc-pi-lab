@@ -1,0 +1,12 @@
+{
+  "moving_physics_samples": 135,
+  "correlated_real_guest_ack_samples": 135,
+  "no_pre_ready_serial_tx": true,
+  "all_hello_intervals_ge_1s": true,
+  "handshake_attempts_each_epoch": [
+    1,
+    1,
+    1
+  ],
+  "median_sim_factor": 0.9711154039395926
+}

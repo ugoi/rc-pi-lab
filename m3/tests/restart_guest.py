@@ -27,12 +27,27 @@ while time.monotonic() - start < 600:
             and d["ack"]
             and d["guest_age_s"] < 0.5
             and d["mode"] == "STOPPED"
+            and d.get("readiness") == "ready"
+            and d["ack"]["steer"] == d["ack"]["throttle"] == 0
+            and all(abs(v - 1500) < 10 for v in d["pwm"]["high_us"][:2])
         ):
             break
     except (OSError, ValueError):
         pass
     time.sleep(0.5)
 else:
+    (root / "evidence/m3" / ("guest-reboot-" + label + ".json")).write_text(
+        json.dumps(
+            {
+                "result": "FAIL",
+                "wall_s": time.monotonic() - start,
+                "previous_epoch": before["epoch"],
+                "state": locals().get("d"),
+                "error": "Guest/bridge restart deadline",
+            },
+            indent=2,
+        )
+    )
     raise SystemExit("Guest/bridge restart deadline")
 result = {
     "result": "READY_STOPPED",

@@ -1,0 +1,60 @@
+F.F........F..
+======================================================================
+FAIL: test_all_hello_paths_share_spacing (__main__.Tests.test_all_hello_paths_share_spacing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/hermes/.paperclip/instances/default/projects/2a33e34f-0128-4c43-88e8-26cbfe843636/b25d62fd-5b49-4ad8-a2c9-9af5dcc52c5e/_default/rc-pi-lab/m3/tests/test_bridge.py", line 95, in test_all_hello_paths_share_spacing
+    self.assertEqual(len(s.serial.messages), 1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 4 != 1
+
+======================================================================
+FAIL: test_boot_does_not_flood_serial (__main__.Tests.test_boot_does_not_flood_serial)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/hermes/.paperclip/instances/default/projects/2a33e34f-0128-4c43-88e8-26cbfe843636/b25d62fd-5b49-4ad8-a2c9-9af5dcc52c5e/_default/rc-pi-lab/m3/tests/test_bridge.py", line 80, in test_boot_does_not_flood_serial
+    self.assertEqual(b.S.serial.messages, [])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [{'epoch': '2480e8d63e944e308d4c66e3db9e33[125 chars]one}] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+{'epoch': '2480e8d63e944e308d4c66e3db9e3304', 'seq': 1, 'op': 'hello', 'steer': 0, 'throttle': 0, 'browser_seq': -1, 'browser_client': None, 'browser_sent_unix_ms': None}
+
++ []
+- [{'browser_client': None,
+-   'browser_sent_unix_ms': None,
+-   'browser_seq': -1,
+-   'epoch': '2480e8d63e944e308d4c66e3db9e3304',
+-   'op': 'hello',
+-   'seq': 1,
+-   'steer': 0,
+-   'throttle': 0}]
+
+======================================================================
+FAIL: test_no_send_before_guest_has_configured_uart (__main__.Tests.test_no_send_before_guest_has_configured_uart)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/hermes/.paperclip/instances/default/projects/2a33e34f-0128-4c43-88e8-26cbfe843636/b25d62fd-5b49-4ad8-a2c9-9af5dcc52c5e/_default/rc-pi-lab/m3/tests/test_bridge.py", line 84, in test_no_send_before_guest_has_configured_uart
+    self.assertEqual(b.S.serial.messages, [])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [{'epoch': '2480e8d63e944e308d4c66e3db9e33[125 chars]one}] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+{'epoch': '2480e8d63e944e308d4c66e3db9e3304', 'seq': 1, 'op': 'hello', 'steer': 0, 'throttle': 0, 'browser_seq': -1, 'browser_client': None, 'browser_sent_unix_ms': None}
+
++ []
+- [{'browser_client': None,
+-   'browser_sent_unix_ms': None,
+-   'browser_seq': -1,
+-   'epoch': '2480e8d63e944e308d4c66e3db9e3304',
+-   'op': 'hello',
+-   'seq': 1,
+-   'steer': 0,
+-   'throttle': 0}]
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.143s
+
+FAILED (failures=3)

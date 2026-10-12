@@ -1,0 +1,41 @@
+{
+  "ste112-baseline": {
+    "result": "FAIL",
+    "observation_s": 600.2252596229991,
+    "ready_s": 250.180876656,
+    "ack_count": 0,
+    "hello_intervals_s": [
+      0.01536502,
+      1.005224589,
+      249.152848298,
+      0.020761892,
+      1.016295807
+    ],
+    "audit_631_unmodified": true
+  },
+  "ste112-uart-trace": {
+    "result": "FAIL",
+    "observation_s": 600.0192031009992,
+    "ready_s": 294.273942766,
+    "ack_count": 0,
+    "hello_intervals_s": [
+      0.010954567,
+      1.006338066,
+      293.252146111,
+      0.01214801,
+      1.014276534
+    ],
+    "audit_631_unmodified": true
+  },
+  "uart_trace": {
+    "sha256": "b2e364c9a3f3a06a7a7d49059af306c30c79626bddd2428ae93b4e61f7637090",
+    "records": 151001,
+    "rx_reads": 32,
+    "last_rx_line_1based": 34955,
+    "last_rx": "pl011_fifo_rx_put RX FIFO push char [0x73] 16/16 depth used",
+    "rx_reads_after_last_put": 0,
+    "first_hello_bytes": 172,
+    "rx_put_count": 49,
+    "received_only_first_hello_prefix": true
+  }
+}

@@ -52,8 +52,17 @@ width, friction 0.1–2, steering angle 0.05–0.6 rad, timestep 1–32 ms. Thes
 software input limits, not physical design recommendations. Wheel torque and
 speed limits are wheel-side; no validated motor-current or battery model exists.
 
-The serial startup handshake retries at most three times per connection/readiness event, at most once a wall second, always neutral,
-with an initial newline to recover from pre-boot console fragments. Pending
+The host sends no serial data before the guest's `ready` beacon (emitted after
+raw UART configuration and neutral I2C writes). This avoids queued input during
+Linux's bounded PL011 FIFO drain. The idle guest repeats that beacon once per
+guest second, including after a guest watchdog stop, so a restarted bridge can
+rediscover it. Beacons are not command ACKs or drive liveness. They never reset
+the attempt budget. The handshake retries at most three times per connection,
+at least one host wall second apart across every send path, always neutral.
+The leading newline delimits partial frames after a connection loss. A full
+start has a 600-wall-second observation deadline; handshake exhaustion and
+missing connection are separately displayed. Only a fresh correlated neutral
+ACK establishes readiness; explicit arming is still required. Pending
 writes are bounded and use nonblocking sends; backpressure disarms. Physics
 telemetry loss also latches the bridge. The shared desktop is an access path,
 not a test of the user's Mac/Safari client.

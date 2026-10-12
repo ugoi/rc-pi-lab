@@ -18,7 +18,7 @@ agent-browser --session "$BROWSER_SESSION" click '#arm'
 sleep 2
 agent-browser --session "$BROWSER_SESSION" get text '#status' > evidence/m3/browser-arm.json
 cat evidence/m3/browser-arm.json
-python3 -c 'import json; assert json.load(open("evidence/m3/browser-arm.json"))["data"]["text"] == "ARMED"'
+python3 -c 'import json; assert json.load(open("evidence/m3/browser-arm.json"))["data"]["text"] == "FAHRBEREIT"'
 agent-browser --session "$BROWSER_SESSION" focus '#throttle'
 for i in 1 2 3 4 5 6; do agent-browser --session "$BROWSER_SESSION" press ArrowRight; done
 sleep 2

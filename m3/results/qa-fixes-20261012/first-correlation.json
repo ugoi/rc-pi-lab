@@ -1,0 +1,6 @@
+{
+  "moving_physics_samples": 21,
+  "correlated_guest_ack_samples": 21,
+  "median_guest_ack_round_trip_s": 0.06945319550140994,
+  "median_sim_factor": 0.9656082232914024
+}

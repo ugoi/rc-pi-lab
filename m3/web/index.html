@@ -90,20 +90,20 @@
   </style>
   <header>
     <h1>Pi 3 · Offroad Labor</h1>
-    <span>Webots R2025a · LIVE</span>
+    <span>Webots R2025a · <span id="feed">Warte auf Daten</span></span>
   </header>
   <main>
     <section>
       <canvas id="view"></canvas>
       <footer>
-        Ziehen: Ansicht drehen · Mausrad: Zoom · Leertaste: STOP<br />Live-Geometrie
+        Ziehen: Ansicht drehen · Mausrad: Zoom · Leertaste: STOP<br />Geometrie
         aus Webots-Kontaktphysik. Vorläufiges Fahrzeugmodell, kein echter Wagen.
       </footer>
     </section>
     <aside>
       <div id="status">Verbinde …</div>
       <p id="reason"></p>
-      <button id="arm">Start / neutral armen</button
+      <button id="arm" disabled>Start / neutral armen</button
       ><button id="stop">STOP</button
       ><label for="throttle">Gas / Rückwärts <output id="tv">0 %</output></label
       ><input
@@ -134,5 +134,6 @@
       >
     </aside>
   </main>
+  <script src="/status.js"></script>
   <script src="/app.js"></script>
 </html>

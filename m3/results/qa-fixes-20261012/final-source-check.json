@@ -1,0 +1,16 @@
+{
+  "result": "PASS",
+  "files": [
+    "m3/bridge.py",
+    "m3/guest_control.py",
+    "m3/init",
+    "m3/actuator_state.py",
+    "m3/controllers/vehicle/vehicle.py",
+    "m3/web/app.js",
+    "m3/web/status.js",
+    "m3/web/index.html",
+    "m3/parameters.json",
+    "m3/worlds/offroad.wbt"
+  ],
+  "note": "Runtime executable/configuration bytes equal delivered source; guest injection separately byte-read back."
+}

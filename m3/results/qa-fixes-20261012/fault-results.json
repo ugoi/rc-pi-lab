@@ -1,0 +1,68 @@
+{
+  "readiness": [
+    {
+      "attempt": "02-fault-start",
+      "deadline_s": 600,
+      "result": "PASS",
+      "wall_s": 251.3952059989988,
+      "epoch": "1ac5a5b9a385409293fb940198dd5a52"
+    }
+  ],
+  "tests": [
+    {
+      "case": "crash",
+      "start": 13549.486884429,
+      "fault_drive_throttle": 1.0,
+      "speed_before_fault_m_s": 0.5554303944573751,
+      "stop_s": 1.3039475059995311,
+      "held_pwm_us": 1995.92,
+      "result": "PASS"
+    },
+    {
+      "case": "freeze",
+      "start": 13270.902212229,
+      "fault_drive_throttle": 1.0,
+      "speed_before_fault_m_s": 0.5554303944813452,
+      "stop_s": 1.2395697540014226,
+      "held_pwm_us": 1995.92,
+      "result": "PASS"
+    },
+    {
+      "case": "motion",
+      "start": 13870.965075416,
+      "fault_drive_throttle": 0.6,
+      "stop_s": 0.15571341199938615,
+      "result": "PASS"
+    },
+    {
+      "case": "stale",
+      "start": 13880.448245773,
+      "fault_drive_throttle": 0.6,
+      "result": "PASS"
+    }
+  ],
+  "restarts": [
+    {
+      "result": "READY_STOPPED",
+      "wall_s": 240.59200539000085,
+      "previous_epoch": "1ac5a5b9a385409293fb940198dd5a52",
+      "new_epoch": "c5c497269b584a3baf0db6a483ce5e70",
+      "neutral_ack": true
+    },
+    {
+      "result": "READY_STOPPED",
+      "wall_s": 223.66105943500042,
+      "previous_epoch": "c5c497269b584a3baf0db6a483ce5e70",
+      "new_epoch": "e438011e50894f7d9a34f4d5a42a3fbb",
+      "neutral_ack": true
+    }
+  ],
+  "idle": [
+    {
+      "result": "PASS",
+      "wall_s": 60.23463404300128,
+      "init": "M3_IDLE_INIT after exit 77"
+    }
+  ],
+  "audit_631_unmodified_count": 3
+}

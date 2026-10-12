@@ -9,7 +9,9 @@ let state = {},
   el = 0.65,
   zoom = 320,
   drag = null,
-  busy = false;
+  busy = false,
+  connected = false,
+  lastResponse = 0;
 async function command(op) {
   if (!epoch) return;
   const ticket =
@@ -32,7 +34,12 @@ async function command(op) {
     body: JSON.stringify(c),
   });
   if (!r.ok) {
-    $("#reason").textContent = (await r.json()).error;
+    const error = (await r.json()).error;
+    $("#reason").textContent = ({
+      'guest not ready': 'Der Pi ist noch nicht bereit oder antwortet nicht mehr.',
+      'another controller owns lease': 'Ein anderer Browser steuert das Fahrzeug.',
+      'neutral required': 'Gas und Lenkung müssen vor dem Start auf null stehen.',
+    })[error] || 'Befehl abgelehnt. Verbindung prüfen und erneut starten.';
   }
 }
 function neutral() {
@@ -76,20 +83,28 @@ setInterval(async () => {
   try {
     let r = await fetch("/state");
     state = await r.json();
+    connected = true;
+    lastResponse = performance.now();
     if (epoch !== state.epoch) {
       epoch = state.epoch;
       seq = 0;
       neutral();
     }
-    $("#status").textContent =
-      state.telemetry_age_s > 0.5 ? "PHYSIK NICHT AKTUELL" : state.mode;
-    $("#reason").textContent = state.reason;
+    const view = statusView(state);
+    $("#status").textContent = view.title;
+    $("#reason").textContent = view.reason;
+    $("#arm").disabled = !view.canArm;
     const t = state.telemetry || {};
     $("#metrics").textContent =
       `Geschwindigkeit: ${(t.speed_m_s || 0).toFixed(3)} m/s\nSimulationsfaktor: ${(t.factor || 0).toFixed(2)} ×\nSimzeit: ${(t.sim_s || 0).toFixed(2)} s\nPWM seq: ${state.pwm?.seq || 0}\nGast ACK: ${state.ack?.seq || 0}\nKontakte: ${t.contact_count || 0}`;
-    if (!document.hidden) await command("drive");
+    if (!document.hidden && state.readiness === "ready") await command("drive");
   } catch (e) {
-    $("#status").textContent = "VERBINDUNG UNTERBROCHEN";
+    connected = false;
+    $("#metrics").textContent = "Fahrzeugdaten veraltet. Aktuelle Geschwindigkeit und Position sind nicht verfügbar.";
+    const view = statusView(null);
+    $("#status").textContent = view.title;
+    $("#reason").textContent = view.reason;
+    $("#arm").disabled = true;
     neutral();
   } finally {
     busy = false;
@@ -229,8 +244,10 @@ function render() {
     ctx.stroke();
   }
   ctx.fillStyle = "#b7d0df";
+  const fresh = connected && state.telemetry_age_s + (performance.now() - lastResponse) / 1000 <= .5;
+  $("#feed").textContent = fresh ? "LIVE" : "LETZTER STAND";
   ctx.fillText(
-    "LIVE · Physikposition aus Webots · Ansicht frei drehbar",
+    fresh ? "LIVE · Physikposition aus Webots · Ansicht frei drehbar" : "LETZTER STAND · Fahrzeugdaten nicht aktuell",
     18,
     26,
   );
