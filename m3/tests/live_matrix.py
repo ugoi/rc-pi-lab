@@ -63,11 +63,15 @@ def command(op="drive", steer=0, throttle=0, **override):
         return e.code, json.load(e)
 
 
-def drive(seconds, steer=0, throttle=0):
+def drive(seconds, steer=0, throttle=0, allow_stopped_rejection=False):
     end = time.monotonic() + seconds
     while time.monotonic() < end:
         code, res = command(steer=steer, throttle=throttle)
-        assert code == 200, res
+        if allow_stopped_rejection and code == 409:
+            assert res["error"] == "controller not armed", res
+            assert state()["mode"] == "STOPPED"
+        else:
+            assert code == 200, res
         time.sleep(0.15)
         d = state()
     return d
@@ -139,7 +143,7 @@ try:
         assert d["telemetry"]["speed_m_s"] > 0.1
         start = time.monotonic()
         result["stop_s"] = stopped(start, "browser_timeout")
-        d = drive(0.5, throttle=0.6)
+        d = drive(0.5, throttle=0.6, allow_stopped_rejection=True)
         assert d["mode"] == "STOPPED"
     elif a.case in ("freeze", "crash"):
         d = drive(2, throttle=a.drive_throttle)
@@ -148,8 +152,8 @@ try:
         before = d["pwm"]["high_us"][1]
         start = time.monotonic()
         command("test_" + a.case)
-        d = drive(1.1, throttle=0.6)
-        result["stop_s"] = stopped(start, "guest_liveness")
+        d = drive(1.1, throttle=0.6, allow_stopped_rejection=True)
+        result["stop_s"] = stopped(start, "guest_liveness_timeout")
         assert abs(state()["pwm"]["high_us"][1] - before) < 0.01, (
             "PCA did not hold commanded pulse"
         )
@@ -163,7 +167,7 @@ try:
         old_ticket = state()["ticket"]
         time.sleep(0.9)
         assert command("arm", ticket=old_ticket)[0] == 409
-        d = drive(0.5, throttle=0.5)
+        d = drive(0.5, throttle=0.5, allow_stopped_rejection=True)
         assert d["mode"] == "STOPPED"
     result["result"] = "PASS"
 except Exception as e:

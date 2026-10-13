@@ -1,0 +1,511 @@
+[
+  {
+    "experiment": "network-first-child-exec",
+    "startup": {
+      "attempt": "network-first",
+      "deadline_s": 600,
+      "result": "PASS",
+      "wall_s": 275.2477117009985,
+      "epoch": "e6cdfb0fb1f64bd6a5cc3e8eecbd9d0e"
+    },
+    "browser": {
+      "returncode": 1,
+      "stdout": "{'result': 'FAIL', 'case': 'browser_bridge_kill', 'client': 'Cloak Chrome via native CDP, fixed owned tab, real Input events', 'stop_s': 1.127790943999571, 'ui_disconnected': 'VERBINDUNG UNTERBROCHEN', 'ui_feed': 'LETZTER STAND', 'error': \"AssertionError('bridge restart readiness deadline')\"}\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/home/hermes/.paperclip/instances/default/projects/2a33e34f-0128-4c43-88e8-26cbfe843636/b25d62fd-5b49-4ad8-a2c9-9af5dcc52c5e/_default/build/ste112-f3/m3/tests/browser_bridge_fault.py\", line 110, in <module>\n    assert time.monotonic() < end, \"bridge restart readiness deadline\"\n           ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: bridge restart readiness deadline\n"
+    },
+    "latency": {
+      "count": 48,
+      "accepted_count": 48,
+      "all_max_s": 0.502176615,
+      "accepted_p95_s": 0.164711248,
+      "accepted_median_s": 0.06328687150000001,
+      "accepted_max_s": 0.502176615,
+      "over_750ms": []
+    }
+  },
+  {
+    "experiment": "network-preload-four",
+    "startup": {
+      "attempt": "network-preload",
+      "deadline_s": 600,
+      "result": "PASS",
+      "wall_s": 300.78196670000034,
+      "epoch": "ac9b4bd0b1c34013a4e618e0d62a4808"
+    },
+    "browser": {
+      "returncode": 1,
+      "stdout": "{'result': 'FAIL', 'case': 'browser_bridge_kill', 'client': 'Cloak Chrome via native CDP, fixed owned tab, real Input events', 'error': \"AssertionError('no browser-driven motion')\"}\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/home/hermes/.paperclip/instances/default/projects/2a33e34f-0128-4c43-88e8-26cbfe843636/b25d62fd-5b49-4ad8-a2c9-9af5dcc52c5e/_default/build/ste112-f3/m3/tests/browser_bridge_fault.py\", line 61, in <module>\n    assert time.monotonic() < end, \"no browser-driven motion\"\n           ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: no browser-driven motion\n"
+    },
+    "latency": {
+      "count": 125,
+      "accepted_count": 123,
+      "all_max_s": 1.247159536,
+      "accepted_p95_s": 0.190929602,
+      "accepted_median_s": 0.06487142,
+      "accepted_max_s": 0.62253801,
+      "over_750ms": [
+        {
+          "epoch": "ac9b4bd0b1c34013a4e618e0d62a4808",
+          "seq": 33,
+          "op": "drive",
+          "rtt_s": 1.247159536,
+          "accepted": false,
+          "tx_wall_ns": 29235986820999,
+          "ack_wall_ns": 29237233980535,
+          "guest_processing_s": 0.019279264,
+          "resources": {
+            "window_s": 1.370489784,
+            "rc-pi-m3-f3-qemu": {
+              "usage_s": 1.640164,
+              "throttle_s": 0.0,
+              "threads": {
+                "277472": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.066032261,
+                  "wait_s": 0.184538919
+                },
+                "277474": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277479": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.116670266,
+                  "wait_s": 0.094343575
+                },
+                "277480": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.854192896,
+                  "wait_s": 0.204221942
+                },
+                "277481": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.128125897,
+                  "wait_s": 0.128623923
+                },
+                "277482": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.143345919,
+                  "wait_s": 0.111959024
+                },
+                "278069": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.021650157,
+                  "wait_s": 0.04872389
+                },
+                "278071": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.018814192,
+                  "wait_s": 0.062191415
+                },
+                "279686": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.020160657,
+                  "wait_s": 0.044420617
+                },
+                "277473": {
+                  "name": "python3",
+                  "run_s": 0.129903125,
+                  "wait_s": 0.062603328
+                },
+                "277491": {
+                  "name": "python3",
+                  "run_s": 0.003662097,
+                  "wait_s": 0.000207318
+                },
+                "277493": {
+                  "name": "python3",
+                  "run_s": 0.005918332,
+                  "wait_s": 0.003334997
+                },
+                "277497": {
+                  "name": "python3",
+                  "run_s": 0.022880445,
+                  "wait_s": 0.025914842
+                }
+              }
+            },
+            "rc-pi-m3-f3-webots": {
+              "usage_s": 0.709307,
+              "throttle_s": 0.0,
+              "threads": {
+                "277501": {
+                  "name": "webots-bin",
+                  "run_s": 0.412328322,
+                  "wait_s": 0.204904965
+                },
+                "277509": {
+                  "name": "QDBusConnection",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277511": {
+                  "name": "QXcbEventQueue",
+                  "run_s": 0.000664556,
+                  "wait_s": 0.004941932
+                },
+                "277529": {
+                  "name": "llvmpipe-0",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277530": {
+                  "name": "llvmpipe-1",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277531": {
+                  "name": "llvmpipe-2",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277532": {
+                  "name": "llvmpipe-3",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277533": {
+                  "name": "llvmpipe-4",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277534": {
+                  "name": "llvmpipe-5",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277535": {
+                  "name": "llvmpipe-6",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277536": {
+                  "name": "llvmpipe-7",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277537": {
+                  "name": "llvmpipe-8",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277538": {
+                  "name": "llvmpipe-9",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277539": {
+                  "name": "llvmpipe-10",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277540": {
+                  "name": "llvmpipe-11",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277541": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277542": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277543": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277544": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277545": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277546": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277547": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277548": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277549": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277550": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277551": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277552": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277688": {
+                  "name": "python3",
+                  "run_s": 0.282473308,
+                  "wait_s": 0.17367177
+                }
+              }
+            }
+          }
+        },
+        {
+          "epoch": "ac9b4bd0b1c34013a4e618e0d62a4808",
+          "seq": 34,
+          "op": "drive",
+          "rtt_s": 0.798113232,
+          "accepted": false,
+          "tx_wall_ns": 29236493567894,
+          "ack_wall_ns": 29237291681126,
+          "guest_processing_s": 0.012468112,
+          "resources": {
+            "window_s": 1.01018813,
+            "rc-pi-m3-f3-qemu": {
+              "usage_s": 1.328685,
+              "throttle_s": 0.0,
+              "threads": {
+                "277472": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.077102435,
+                  "wait_s": 0.203292271
+                },
+                "277474": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277479": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.148528744,
+                  "wait_s": 0.137326648
+                },
+                "277480": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.591571786,
+                  "wait_s": 0.172367719
+                },
+                "277481": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.143752593,
+                  "wait_s": 0.160579449
+                },
+                "277482": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.140874199,
+                  "wait_s": 0.119776609
+                },
+                "278069": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.014742106,
+                  "wait_s": 0.028067493
+                },
+                "278071": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.01193639,
+                  "wait_s": 0.04398638
+                },
+                "279686": {
+                  "name": "qemu-system-aar",
+                  "run_s": 0.0122544,
+                  "wait_s": 0.027161296
+                },
+                "277473": {
+                  "name": "python3",
+                  "run_s": 0.088657592,
+                  "wait_s": 0.046434681
+                },
+                "277491": {
+                  "name": "python3",
+                  "run_s": 0.003662097,
+                  "wait_s": 0.000207318
+                },
+                "277493": {
+                  "name": "python3",
+                  "run_s": 0.010197814,
+                  "wait_s": 0.015635662
+                },
+                "277497": {
+                  "name": "python3",
+                  "run_s": 0.016554118,
+                  "wait_s": 0.024867789
+                }
+              }
+            },
+            "rc-pi-m3-f3-webots": {
+              "usage_s": 0.573516,
+              "throttle_s": 0.0,
+              "threads": {
+                "277501": {
+                  "name": "webots-bin",
+                  "run_s": 0.335433781,
+                  "wait_s": 0.152071018
+                },
+                "277509": {
+                  "name": "QDBusConnection",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277511": {
+                  "name": "QXcbEventQueue",
+                  "run_s": 0.000403508,
+                  "wait_s": 0.000107422
+                },
+                "277529": {
+                  "name": "llvmpipe-0",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277530": {
+                  "name": "llvmpipe-1",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277531": {
+                  "name": "llvmpipe-2",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277532": {
+                  "name": "llvmpipe-3",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277533": {
+                  "name": "llvmpipe-4",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277534": {
+                  "name": "llvmpipe-5",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277535": {
+                  "name": "llvmpipe-6",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277536": {
+                  "name": "llvmpipe-7",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277537": {
+                  "name": "llvmpipe-8",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277538": {
+                  "name": "llvmpipe-9",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277539": {
+                  "name": "llvmpipe-10",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277540": {
+                  "name": "llvmpipe-11",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277541": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277542": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277543": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277544": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277545": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277546": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277547": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277548": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277549": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277550": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277551": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277552": {
+                  "name": "webots-bin",
+                  "run_s": 0.0,
+                  "wait_s": 0.0
+                },
+                "277688": {
+                  "name": "python3",
+                  "run_s": 0.234246195,
+                  "wait_s": 0.133174114
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+]

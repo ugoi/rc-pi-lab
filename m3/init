@@ -4,6 +4,18 @@ mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mount -t tmpfs tmpfs /run
+mount -t tmpfs -o size=32m,mode=1777 tmpfs /tmp
+# The stateless control app must not contend with emulated SD writeback.
+root_options=$(awk '$2 == "/" {print $4}' /proc/mounts)
+case ",$root_options," in
+ *,ro,*) echo M3_ROOT_MODE_RO ;;
+ *) echo M3_CONFIG_ERROR_ROOT_NOT_READONLY; exit 2 ;;
+esac
+export PYTHONDONTWRITEBYTECODE=1
+# lgpio creates its notification FIFO in cwd even for Blinka's I2C setup.
+mkdir -p /run/rc-control || exit 3
+cd /run/rc-control || exit 3
+echo M3_WORKDIR_TMPFS_RUN_RC_CONTROL
 modprobe i2c-bcm2835
 modprobe i2c-dev
 export PYTHONPATH=/opt/rc-lab/packages

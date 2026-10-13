@@ -29,14 +29,16 @@ stopped. No host rebuild, production-service restart or public listener.
    until neutral PWM and fresh guest ACKs exist. Check `evidence/m3/serial.log`.
 4. Open `http://127.0.0.1:18090` on Agent Services. For the existing private browser,
    open https://agent-desktop.tailea77a9.ts.net through Tailscale and select the
-   **Pi 3 · Offroad Labor** tab. It is the actual shared Cloak desktop; coordinate
+   **Pi 3 · Offroad Labor** tab (review runtime `127.0.0.1:18094`, Compose
+   project `ste112-fix`; a fresh default setup above uses 18090). It is the actual shared Cloak desktop; coordinate
    before taking control. Alternatively forward privately from your computer:
    `ssh -N -L 18090:127.0.0.1:18090 agent-services`, then open that local URL.
 5. Click **Start / neutral armen**, wait for **FAHRBEREIT**, then use gas and steering.
-   **STOP** or Space stops and disarms. Close/hidden tabs also request stop;
+   **STOP** or Space stops and disarms. The controlling tab requests stop when hidden;
    heartbeat loss independently stops. Reopen/reconnect requires manual arming.
-6. Shut down only this lab: `docker compose -f m3/compose.yaml down` (or
-   `docker stop rc-pi-m3-qemu rc-pi-m3-webots` for the development containers).
+6. Shut down a fresh default lab: `docker compose -f m3/compose.yaml down`.
+   The published review uses project `ste112-fix`: stop it explicitly with
+   `docker stop rc-pi-m3-fix-qemu rc-pi-m3-fix-webots` in any directory.
    Guest is a disposable snapshot; M1/M2 originals stay unchanged.
 
 Never edit an image while QEMU uses it. Stop the guest container before an offline
@@ -49,8 +51,8 @@ never changes a pose directly. Preserve each evidence directory before retesting
 `python3 m3/tests/test_bridge.py` tests watchdog/backpressure and PWM gating with
 host fixtures, isolated from live actuator output. This is not an E2E proof.
 `m3/tests/live_matrix.py --case ...` drives the running real chain via HTTP and
-asserts motion/stop data. Close the UI tab or navigate it away first to release
-its control lease. Fault injection needs the bridge's explicit `M3_TESTING=1`;
+asserts motion/stop data. A stopped vehicle is claimed only by an explicit neutral arm. Idle viewer tabs
+do not renew a lease. Unarmed/non-owner drive requests are rejected with HTTP409. Fault injection needs the bridge's explicit `M3_TESTING=1`;
 the standard compose runtime disables this HTTP operation. Guest fault hooks additionally require `M3_TESTING=1` at QEMU launch;
 normal startup leaves both gates disabled. After the first complete package
 audit, repeat fault-test boots of the exact unchanged base may use
@@ -74,6 +76,10 @@ slirp `user` backend is compiled. Other QEMU builds can provide USB networking;
 this implementation chooses serial to preserve the accepted M2 device build.
 This is a build-specific capability finding, not a claim that Pi networking is
 impossible in QEMU. Raw output: `evidence/m3/network-capabilities.txt`.
+During F3 diagnosis a separate QEMU build with USB networking and Slirp did run
+Linux TCP end to end, but still reproduced availability failures. That prototype
+and its measurements are archived; the delivered runtime retains the original
+UART/device build. Neither experiment proves physical Pi networking/Bluetooth.
 
 ## Independent QA isolation
 
@@ -157,3 +163,29 @@ container's configured fault gate. A guest crash emits `M3_APP_EXIT code=77` the
 Every successful full restart must show a new epoch, fresh neutral ACK and PWM.
 See `m3/results/qa-fixes-20261012` and the native correction report for all attempts,
 source diagnosis, delivered pins, raw evidence and the independent QA boundary.
+
+### Isolated browser acceptance client (F3 investigation)
+
+`python3 m3/tests/browser_bridge_fault.py` and `browser_guest_pause.py` attach
+to existing Cloak Chrome CDP9222 using Node's native WebSocket. Each test creates
+and disposes its own browser context, sends real mouse/key events, and records
+actual Page.startScreencast JPEG frames with timestamps. FFmpeg pads odd sizes
+to even pixels and encodes with one thread. Node22.23.2 and FFmpeg were used.
+Set M3_URL and M3_GUEST_CONTAINER for the owned lab. M3_BROWSER_TARGET is an
+optional explicit already-owned CDP target; tests never fall back to other tabs.
+No Chrome service/profile restart, provider login, or test input through /command
+is performed by this browser driver. Prior Agent Browser failures are retained.
+The first failed attempt is not erased by a subsequent helper fix.
+
+### F3: immutable guest filesystem during control
+
+The M3 root filesystem boots read-only. Init verifies that mount mode, puts
+`/run` and `/tmp` in guest RAM (`/tmp` limit 32 MiB), and disables Python bytecode
+cache writes. Its working directory is `/run/rc-control`: the original lgpio
+package requires a writable directory for its notification FIFO. The control application and original Adafruit files are unchanged
+by this operating profile. Persistent guest SD writes are outside the supported
+active-driving profile: QEMU 10.1.0's emulated SD write path produced long stalls
+during diagnosis. Logs remain on the host through the existing bridges. Root
+image preparation/update still runs offline while its own QEMU is stopped.
+This is an emulation constraint, not a measurement of physical Pi SD performance.
+Watchdog and stop deadlines remain unchanged; no warmup/retry grants readiness.

@@ -1,4 +1,4 @@
-import importlib.util, json, os, unittest, time, tempfile
+import importlib.util, io, json, os, unittest, time, tempfile
 from unittest.mock import patch
 from pathlib import Path
 
@@ -34,6 +34,30 @@ class Tests(unittest.TestCase):
         s.pwm = {"seq": 4, "ns": 123, "high_us": [1500, 1750] + [0] * 14}
         s.ack = {"seq": 2, "op": "drive", "steer": 0, "throttle": 0.5}
         return s
+
+    def request(self, client, op):
+        command=dict(epoch=b.EPOCH, client=client, seq=1, op=op, steer=0,
+                     throttle=0, ticket=b.issue_ticket())
+        raw=json.dumps(command).encode()
+        h=object.__new__(b.Handler)
+        h.headers={"Origin":"http://test", "Host":"test", "Content-Length":str(len(raw))}
+        h.rfile=io.BytesIO(raw);h.path="/command"
+        result=[];h.reply=lambda code,body:result.append((code,body))
+        h.do_POST()
+        return result[0]
+
+    def test_idle_page_cannot_take_control_lease(self):
+        self.assertEqual(self.request("spectator", "drive")[0],409)
+        self.assertIsNone(b.S.client)
+        self.assertEqual(b.S.browser,0)
+
+    def test_explicit_arm_can_take_stopped_lease(self):
+        s=self.arm();s.mode="STOPPED";s.client="old-page"
+        self.assertEqual(self.request("new-page", "arm")[0],200)
+        self.assertEqual(s.client,"new-page")
+        self.assertEqual(s.mode,"ARMING")
+        self.assertEqual(self.request("spectator", "drive")[0],409)
+        self.assertEqual(s.client,"new-page")
 
     def test_held_pwm_does_not_keep_guest_alive(self):
         s = self.arm()

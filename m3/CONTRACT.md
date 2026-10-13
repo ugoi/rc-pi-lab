@@ -77,3 +77,18 @@ No verbose pre-application echo is sent over the UART. Late ACKs remain invalid
 for liveness; no watchdog values changed. On a latched stop the UI clears and
 disables its input sliders, preserves the reason after fresh neutral replies,
 and requires an explicit Start. This does not imply real hardware shutdown.
+
+## F3 storage and browser ownership profile
+
+Active control uses a read-only guest root, verified by init. `/tmp` is a
+32-MiB guest tmpfs, `/run` is tmpfs, and the app runs in `/run/rc-control` for
+lgpio's required notification FIFO. Python bytecode cache writes are disabled.
+This avoids background writes through the slow emulated SD controller; it is an
+explicit simulation operating limit, not a real Pi performance claim. App and
+original library bytes do not depend on this host/guest filesystem placement.
+
+Only explicit neutral arm claims a stopped vehicle's browser lease. Idle viewers
+do not send drive heartbeats. An unarmed or non-owner drive returns HTTP409
+`controller not armed`; STOP remains available from every viewer. A hidden
+controlling page stops its vehicle, while a hidden spectator does not disturb
+the owner. Freshness, arm dwell and all stop deadlines above remain unchanged.

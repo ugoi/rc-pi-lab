@@ -1,5 +1,5 @@
 /* Current status only. Historical telemetry.source is never an active state. */
-function statusView(s) {
+function statusView(s, ownsControl = true) {
   if (!s) return {title: 'VERBINDUNG UNTERBROCHEN', reason: 'Die Steuerbrücke ist nicht erreichbar. Keine aktuellen Fahrzeugdaten; nach Wiederverbindung neu starten.', canArm: false};
   const readiness = {
     disconnected: ['GAST NICHT VERBUNDEN', 'Die serielle Verbindung zum Pi fehlt. Fahrzeug bleibt gestoppt.'],
@@ -24,6 +24,7 @@ function statusView(s) {
     physics_timeout: 'Die Fahrzeugsimulation antwortet nicht mehr. Start bleibt gesperrt.',
     reversal_braking: 'Vor dem Richtungswechsel wird bis zum Stillstand gebremst.',
   };
+  if (!ownsControl && s.mode === 'ARMED' && s.telemetry.mode === 'ARMED') return {title: 'ANDERER BROWSER STEUERT', reason: 'Gas und Lenkung gehören einem anderen Browser. STOP hält das Fahrzeug jederzeit an.', canArm: false};
   const t = s.telemetry;
   const reason = reasons[t.reason] || reasons[s.reason];
   if (t.mode === 'ARMED' && s.mode === 'ARMED') return {title: 'FAHRBEREIT', reason: reason || 'Gas und Lenkung sind aktiv. STOP hält an und sperrt den Antrieb.', canArm: false};

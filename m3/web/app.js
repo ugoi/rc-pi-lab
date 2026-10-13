@@ -74,7 +74,7 @@ window.onkeydown = (e) => {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     neutral();
-    command("stop");
+    if (state.client === client && state.mode !== "STOPPED") command("stop");
   }
 });
 setInterval(async () => {
@@ -90,17 +90,18 @@ setInterval(async () => {
       seq = 0;
       neutral();
     }
-    if (state.mode !== "ARMED") neutral();
-    $("#throttle").disabled = state.mode !== "ARMED";
-    $("#steer").disabled = state.mode !== "ARMED";
-    const view = statusView(state);
+    const ownsControl = state.client === client;
+    if (state.mode !== "ARMED" || !ownsControl) neutral();
+    $("#throttle").disabled = state.mode !== "ARMED" || !ownsControl;
+    $("#steer").disabled = state.mode !== "ARMED" || !ownsControl;
+    const view = statusView(state, ownsControl);
     $("#status").textContent = view.title;
     $("#reason").textContent = view.reason;
     $("#arm").disabled = !view.canArm;
     const t = state.telemetry || {};
     $("#metrics").textContent =
       `Geschwindigkeit: ${(t.speed_m_s || 0).toFixed(3)} m/s\nSimulationsfaktor: ${(t.factor || 0).toFixed(2)} ×\nSimzeit: ${(t.sim_s || 0).toFixed(2)} s\nPWM seq: ${state.pwm?.seq || 0}\nGast ACK: ${state.ack?.seq || 0}\nKontakte: ${t.contact_count || 0}`;
-    if (!document.hidden && state.readiness === "ready") await command("drive");
+    if (!document.hidden && state.readiness === "ready" && state.client === client && ["ARMING", "ARMED"].includes(state.mode)) await command("drive");
   } catch (e) {
     connected = false;
     $("#metrics").textContent = "Fahrzeugdaten veraltet. Aktuelle Geschwindigkeit und Position sind nicht verfügbar.";
@@ -108,6 +109,7 @@ setInterval(async () => {
     $("#status").textContent = view.title;
     $("#reason").textContent = view.reason;
     $("#arm").disabled = true;
+    $("#throttle").disabled = $("#steer").disabled = true;
     neutral();
   } finally {
     busy = false;

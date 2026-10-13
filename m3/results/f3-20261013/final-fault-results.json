@@ -1,0 +1,62 @@
+{
+  "test-stale-1791859963737279813.json": {
+    "case": "stale",
+    "start": 35779.686331594,
+    "fault_drive_throttle": 0.6,
+    "result": "PASS"
+  },
+  "test-crash-1791860030871723959.json": {
+    "case": "crash",
+    "start": 35846.814472057,
+    "fault_drive_throttle": 1.0,
+    "speed_before_fault_m_s": 0.5554303944459601,
+    "stop_s": 1.3155833089986118,
+    "held_pwm_us": 1995.92,
+    "result": "PASS"
+  },
+  "browser-pause-1791859947572581412.json": {
+    "result": "PASS",
+    "case": "browser_guest_pause",
+    "pause_started_wall_ns": 35767571984990,
+    "qemu_pid": 7,
+    "stop_s": 1.5396289980053552,
+    "pause_resumed_wall_ns": 35769565913228,
+    "ui_status": "SICHERHEITSSTOPP",
+    "ui_reason": "Die Antwort des Pi kam zu sp\u00e4t. Sicherheitsstopp; Gas ist null. Erst nach frischer Antwort erneut starten."
+  },
+  "idle-after-crash-1791860096963910114.json": {
+    "result": "PASS",
+    "wall_s": 60.23086274399975,
+    "init": "M3_IDLE_INIT after exit 77"
+  },
+  "browser-bridge-fault-1791860324156920672.json": {
+    "result": "PASS",
+    "case": "browser_bridge_kill",
+    "client": "Cloak Chrome via native CDP, fixed owned tab, real Input events",
+    "stop_s": 1.111633891996462,
+    "ui_disconnected": "VERBINDUNG UNTERBROCHEN",
+    "ui_feed": "LETZTER STAND",
+    "ui_reconnected": "GESTOPPT"
+  },
+  "readiness-final-fault.json": {
+    "attempt": "final-fault",
+    "deadline_s": 600,
+    "result": "PASS",
+    "wall_s": 206.68334208700253,
+    "epoch": "8524ed8dc3674c918a06cc3b7614c4e5"
+  },
+  "guest-reboot-1791860126563251670.json": {
+    "result": "READY_STOPPED",
+    "wall_s": 197.03259928299667,
+    "scope": "guest and bridge container restarted; existing configured fault/audit flags retained",
+    "previous_epoch": "8524ed8dc3674c918a06cc3b7614c4e5"
+  },
+  "test-disconnect-1791859997138020474.json": {
+    "case": "disconnect",
+    "start": 35813.136994564,
+    "fault_drive_throttle": 1.0,
+    "speed_before_fault_m_s": 0.5554303944462105,
+    "stop_s": 0.7925653199999942,
+    "result": "PASS"
+  }
+}

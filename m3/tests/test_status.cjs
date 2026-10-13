@@ -24,3 +24,10 @@ assert.equal(statusView(recovered).title, 'SICHERHEITSSTOPP');
 assert.match(statusView(recovered).reason, /zu spät/);
 assert.equal(statusView(recovered).canArm, true);
 console.log('UI_LATE_ACK_PASS: fresh neutral does not erase latched stop reason');
+
+const spectator = statusView({...s, telemetry:{mode:'ARMED',source_status:'fresh'}}, false);
+assert.equal(spectator.title, 'ANDERER BROWSER STEUERT');
+assert.equal(spectator.canArm, false);
+console.log('UI_OWNERSHIP_PASS');
+
+assert.equal(statusView(s, false).title, 'GESTOPPT');

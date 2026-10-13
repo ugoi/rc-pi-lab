@@ -1,0 +1,93 @@
+{
+  "readonly-ram-normal": {
+    "count": 2170,
+    "accepted_count": 2170,
+    "all_max_s": 0.184225454,
+    "accepted_p95_s": 0.080942747,
+    "accepted_median_s": 0.0364314015,
+    "accepted_max_s": 0.184225454,
+    "late_count": 0,
+    "startups": [
+      {
+        "attempt": "readonly-ram",
+        "deadline_s": 600,
+        "result": "PASS",
+        "wall_s": 194.97021839999798,
+        "epoch": "547d53a42ce64d37801fc24b939dfbf8"
+      }
+    ]
+  },
+  "storage-rw-sd": {
+    "count": 154,
+    "accepted_count": 139,
+    "all_max_s": 7.498172259,
+    "accepted_p95_s": 0.061607255,
+    "accepted_median_s": 0.027535754,
+    "accepted_max_s": 0.401043579,
+    "late_count": 15,
+    "startups": [
+      {
+        "attempt": "storage-rw-sd",
+        "deadline_s": 600,
+        "result": "PASS",
+        "wall_s": 166.69804075999855,
+        "epoch": "ef46d88dd92040b3bc8ae42e6d356518"
+      }
+    ],
+    "storage_markers": [
+      {
+        "event": "storage_probe",
+        "phase": "start",
+        "guest_ns": 148293895616,
+        "mounts": [
+          "/dev/root / ext4 rw,noatime 0 0"
+        ],
+        "stat": "489     1028    42062    95859       20        6     8096    41065        0    87228   136924        0        0        0        0        0        0"
+      },
+      {
+        "event": "storage_probe",
+        "phase": "end",
+        "guest_ns": 156730941344,
+        "elapsed_ns": 8328481328,
+        "stat": "491     1028    42078    95907       28       13    12280    61780        0    95024   157688        0        0        0        0        0        0"
+      }
+    ]
+  },
+  "storage-ro-ram": {
+    "count": 874,
+    "accepted_count": 874,
+    "all_max_s": 0.405124679,
+    "accepted_p95_s": 0.051474752,
+    "accepted_median_s": 0.026167643,
+    "accepted_max_s": 0.405124679,
+    "late_count": 0,
+    "startups": [
+      {
+        "attempt": "storage-ro-ram",
+        "deadline_s": 600,
+        "result": "PASS",
+        "wall_s": 168.92392887500318,
+        "epoch": "6a5e340d5b174fe1a3e8476ba944a98d"
+      }
+    ],
+    "storage_markers": [
+      {
+        "event": "storage_probe",
+        "phase": "start",
+        "guest_ns": 145369638144,
+        "mounts": [
+          "/dev/root / ext4 ro,relatime 0 0",
+          "tmpfs /tmp tmpfs rw,relatime,size=32768k 0 0"
+        ],
+        "stat": "493     1020    42558    97833        0        0        0        0        0    77656    97833        0        0        0        0        0        0"
+      },
+      {
+        "event": "storage_probe",
+        "phase": "end",
+        "guest_ns": 145599103808,
+        "elapsed_ns": 169283872,
+        "stat": "493     1020    42558    97833        0        0        0        0        0    77656    97833        0        0        0        0        0        0"
+      }
+    ]
+  }
+}

@@ -9,6 +9,7 @@ import subprocess
 import time
 import urllib.request
 from pathlib import Path
+from browser_client import browser_command
 
 root = Path(__file__).resolve().parents[2]
 evidence = root / "evidence/m3"
@@ -20,12 +21,9 @@ result = {"result": "FAIL", "case": "browser_guest_pause", "samples": []}
 
 
 def browser(*args):
-    r = subprocess.run(["agent-browser", "--session", session, *args],
-                       capture_output=True, text=True, timeout=20)
-    with (evidence / ("browser-pause-console-" + label + ".txt")).open("a") as f:
-        f.write(repr(args) + "\n" + r.stdout + r.stderr + "\n")
-    assert r.returncode == 0, r.stderr
-    data = json.loads(r.stdout)
+    data = browser_command(args)
+    with (evidence / ("browser-client-" + label + ".jsonl")).open("a") as f:
+        f.write(json.dumps(dict(args=args, response=data)) + "\n")
     assert data.get("success"), data
     return data["data"]
 
@@ -50,6 +48,7 @@ print(pids[0])
 paused = recording = False
 try:
     assert state()["readiness"] == "ready"
+    browser("tab", os.environ.get("M3_BROWSER_TARGET", "__owned__"))
     browser("open", url)
     browser("record", "start", str(evidence / ("browser-pause-" + label + ".mp4")), "--fps", "15")
     recording = True

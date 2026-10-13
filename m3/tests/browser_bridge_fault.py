@@ -4,6 +4,7 @@ Requires exclusive use of the named lab tab, not of the shared browser profile.
 
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
+from browser_client import browser_command
 
 root = Path(__file__).resolve().parents[2]
 evidence = root / "evidence/m3"
@@ -15,18 +16,14 @@ rows = []
 result = {
     "result": "FAIL",
     "case": "browser_bridge_kill",
-    "client": "Agent Browser attached to existing Cloak CDP",
+    "client": "Cloak Chrome via native CDP, fixed owned tab, real Input events",
 }
 
 
 def browser(*args):
-    r = subprocess.run(
-        ["agent-browser", "--session", session, *args], text=True, capture_output=True, timeout=20
-    )
-    with (evidence / ("browser-fault-console-" + label + ".txt")).open("a") as f:
-        f.write(repr(args) + "\n" + r.stdout + r.stderr + "\n")
-    assert r.returncode == 0, r.stderr
-    d = json.loads(r.stdout)
+    d = browser_command(args)
+    with (evidence / ("browser-client-" + label + ".jsonl")).open("a") as f:
+        f.write(json.dumps(dict(args=args, response=d)) + "\n")
     assert d.get("success"), d
     return d["data"]
 
@@ -38,6 +35,7 @@ def state():
 recording = False
 try:
     assert state()["readiness"] == "ready"
+    browser("tab", os.environ.get("M3_BROWSER_TARGET", "__owned__"))
     browser("open", url)
     browser("set", "viewport", "1280", "900")
     browser(

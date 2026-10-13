@@ -400,6 +400,7 @@ class Handler(BaseHTTPRequestHandler):
                         epoch=EPOCH,
                         ticket=issue_ticket(),
                         mode=S.mode,
+                        client=S.client,
                         reason=S.reason,
                         readiness=readiness(),
                         startup_elapsed_s=time.monotonic() - S.started_at,
@@ -454,10 +455,13 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("nonfinite input")
             with lock:
                 consume_ticket(c.get("ticket"))
+                if op == "drive" and (S.mode not in ("ARMING", "ARMED") or S.client != c["client"]):
+                    raise ValueError("controller not armed")
                 if op == "stop":
                     S.stop("browser_stop")
                 elif (
-                    S.client not in (None, c["client"])
+                    S.mode != "STOPPED"
+                    and S.client not in (None, c["client"])
                     and time.monotonic() - S.browser < P["browser_timeout_s"]
                 ):
                     raise ValueError("another controller owns lease")

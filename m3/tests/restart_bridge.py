@@ -117,7 +117,15 @@ except urllib.error.HTTPError as e:
     assert e.code == 409
 new_epoch = d["epoch"]
 epoch = new_epoch
-drive(1.2, 0.6)
+end = time.monotonic() + 1.2
+while time.monotonic() < end:
+    try:
+        command("drive", 0.6)
+        raise AssertionError("unarmed drive accepted")
+    except urllib.error.HTTPError as e:
+        assert e.code == 409
+        assert json.load(e)["error"] == "controller not armed"
+    time.sleep(.15)
 d = state()
 assert d["mode"] == "STOPPED" and d["telemetry"]["speed_m_s"] < 0.03
 out = (
