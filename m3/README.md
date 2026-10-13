@@ -170,7 +170,8 @@ source diagnosis, delivered pins, raw evidence and the independent QA boundary.
 to existing Cloak Chrome CDP9222 using Node's native WebSocket. Each test creates
 and disposes its own browser context, sends real mouse/key events, and records
 actual Page.startScreencast JPEG frames with timestamps. FFmpeg pads odd sizes
-to even pixels and encodes with one thread. Node22.23.2 and FFmpeg were used.
+to even pixels and encodes with one thread. The shell CLI probe reports Node22.23.2; the actual privileged test child
+resolves Node24.19.0. The live runs used that Node24.19.0 child and FFmpeg.
 Set M3_URL and M3_GUEST_CONTAINER for the owned lab. M3_BROWSER_TARGET is an
 optional explicit already-owned CDP target; tests never fall back to other tabs.
 No Chrome service/profile restart, provider login, or test input through /command
