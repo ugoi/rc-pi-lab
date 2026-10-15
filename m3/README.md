@@ -198,6 +198,33 @@ python3 m3/tests/browser_bridge_fault.py
 python3 m3/tests/shared_browser_snapshot.py verify evidence/m3/personal-before.json evidence/m3/personal-after.json
 ```
 
+### F4-B/F4-C follow-up
+
+The bridge takes a detached `/state` snapshot under its state lock, then writes
+the HTTP response after releasing the lock. A slow HTTP reader cannot hold up
+the controller/watchdog tick. The regression fixture blocks the response and
+checks that an expired control lease still stops immediately. This demonstrates
+the repaired blocking mechanism; it does not by itself identify the cause of a
+previous live scheduling gap. Guest and physics safety deadlines are unchanged.
+
+Finish image copying, hashing and byte comparisons **before** a measured browser
+series. Archive their results first; do not overlap these bulk I/O operations
+with a normal availability test. If testing I/O load deliberately, label it as
+a separate condition and retain every attempt. The QA F4-B observation included
+a concurrent 4-GiB comparison, whose causal contribution was not established.
+
+The recording helper now acknowledges `record start` only after a real CDP frame
+arrives (3-s maximum). `record wait_frames N` waits at most 3 s for an observed
+frame count; no synthetic frames are inserted. Every frame is considered instead
+of dropping alternate updates. The fixture changes visually every 100 ms and
+waits for observed frames instead of assuming a 1.2-s sleep yields a video.
+Recording receipts preserve frame counts, timestamps and failure events even if
+recording or encoding fails. The second fresh-profile check is independent of
+the video check. The eight real-process tests preserve their logs and receipts
+under `evidence/m3/browser-process-tests`; set `M3_BROWSER_TEST_EVIDENCE` to an
+explicit evidence directory for a bounded acceptance run. These are local
+fixture results, not vehicle acceptance.
+
 The standalone local test browser uses `--no-sandbox` for the existing NixOS
 runtime, no personal credentials/extensions, and only accepts loopback HTTP
 navigation. There is no browser service, host configuration or profile change.

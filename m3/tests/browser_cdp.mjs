@@ -4,6 +4,26 @@ import readline from 'node:readline';
 import {spawnSync} from 'node:child_process';
 import {launchOwnedBrowser} from './owned_browser.mjs';
 let recording=null;
+function recordingReceipt(r, status, error) {
+ r.events.push({status,error,frameCount:r.frames.length,at:new Date().toISOString()});
+ fs.writeFileSync(r.output+'.timestamps.json',JSON.stringify({
+  client:'Chrome CDP Page.startScreencast',target:r.target,startedAt:r.startedAt,
+  status,error,frameCount:r.frames.length,frames:r.frames,events:r.events,
+ },null,2));
+}
+async function waitFrames(count) {
+ const r=recording;
+ if(!r || !Number.isInteger(count) || count<1 || count>10000)throw Error('invalid recording frame wait');
+ const end=Date.now()+3000;
+ while(r.frames.length<count) {
+  if(Date.now()>=end) {
+   const error=`recording deadline: received ${r.frames.length}, required ${count} live frames`;
+   recordingReceipt(r,'incomplete',error);throw Error(error);
+  }
+  await new Promise(resolve=>setTimeout(resolve,20));
+ }
+ return {frames:r.frames.length};
+}
 const browser=launchOwnedBrowser(m=>{
  if(m.method==='Page.screencastFrame'){
   const r=recording;
@@ -40,15 +60,23 @@ async function command(a){
  if(a[0]==='get'){const property=a[1]==='text'?'textContent':'value';return {[a[1]]:await evaluate(`document.querySelector(${JSON.stringify(a[2])})[${JSON.stringify(property)}]`)};}
  if(a[0]==='screenshot'){const r=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(a[1],Buffer.from(r.data,'base64'));return {};}
  if(a[0]==='record'&&a[1]==='start'){
-  recording={output:a[2],dir:a[2]+'.frames',frames:[]};fs.mkdirSync(recording.dir,{recursive:true});await call('Page.startScreencast',{format:'jpeg',quality:65,maxWidth:1280,maxHeight:900,everyNthFrame:2});return {};
+  if(recording)throw Error('recording already active');
+  recording={output:a[2],dir:a[2]+'.frames',frames:[],events:[],target,startedAt:new Date().toISOString()};
+  fs.mkdirSync(recording.dir,{recursive:true});
+  await call('Page.startScreencast',{format:'jpeg',quality:65,maxWidth:1280,maxHeight:900,everyNthFrame:1});
+  return await waitFrames(1);
  }
+ if(a[0]==='record'&&a[1]==='wait_frames')return await waitFrames(+a[2]);
  if(a[0]==='record'&&a[1]==='stop'){
-  await call('Page.stopScreencast');const r=recording;recording=null;if(!r||r.frames.length<2)throw Error('no live recording frames');
-  fs.writeFileSync(r.output+'.timestamps.json',JSON.stringify({client:'Chrome CDP Page.startScreencast',target,frames:r.frames},null,2));
+  await call('Page.stopScreencast');const r=recording;recording=null;
+  if(!r)throw Error('no active recording');
+  recordingReceipt(r,r.frames.length<2?'incomplete':'captured');
+  if(r.frames.length<2)throw Error(`insufficient live recording frames: ${r.frames.length}`);
   let list='';for(let i=0;i<r.frames.length;i++){list+=`file '${r.frames[i].file}'\n`;if(i+1<r.frames.length)list+=`duration ${Math.max(.001,r.frames[i+1].timestamp-r.frames[i].timestamp)}\n`;}
   list+=`file '${r.frames.at(-1).file}'\n`;fs.writeFileSync(r.dir+'/frames.txt',list);
   const p=spawnSync('ffmpeg',['-hide_banner','-loglevel','error','-y','-f','concat','-safe','0','-i',r.dir+'/frames.txt','-vf','pad=ceil(iw/2)*2:ceil(ih/2)*2,fps=15','-c:v','libx264','-threads','1','-filter_threads','1','-pix_fmt','yuv420p',r.output],{encoding:'utf8',timeout:30000});
-  if(p.status!==0)throw Error('video encode failed '+p.stderr);fs.rmSync(r.dir,{recursive:true});return {path:r.output,frames:r.frames.length};
+  if(p.status!==0){recordingReceipt(r,'encode_failed',p.stderr);throw Error('video encode failed '+p.stderr);}
+  recordingReceipt(r,'encoded');fs.rmSync(r.dir,{recursive:true});return {path:r.output,frames:r.frames.length};
  }
  throw Error('unsupported browser command '+a.join(' '));
 }
@@ -56,4 +84,7 @@ for await(const line of readline.createInterface({input:process.stdin,crlfDelay:
  try {process.stdout.write(JSON.stringify({success:true,data:await command(JSON.parse(line))})+'\n');}
  catch(error){process.stdout.write(JSON.stringify({success:false,error:String(error)})+'\n');}
 }
-} finally { await browser.cleanup('EOF or command/startup failure'); }
+} finally {
+ try {if(recording)recordingReceipt(recording,'interrupted','helper closed before record stop');}
+ finally {await browser.cleanup('EOF or command/startup failure');}
+}

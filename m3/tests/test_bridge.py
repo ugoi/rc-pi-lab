@@ -1,4 +1,4 @@
-import importlib.util, io, json, os, unittest, time, tempfile
+import importlib.util, io, json, os, unittest, time, tempfile, threading
 from unittest.mock import patch
 from pathlib import Path
 
@@ -75,6 +75,35 @@ class Tests(unittest.TestCase):
         s.browser = s.guest = time.monotonic()
         b.tick()
         self.assertEqual(s.mode, "STOPPED")
+
+    def test_stalled_state_response_does_not_block_watchdog(self):
+        s = self.arm()
+        s.browser -= 1
+        entered = threading.Event()
+        release = threading.Event()
+        tick_done = threading.Event()
+        h = object.__new__(b.Handler)
+        h.path = "/state"
+
+        def blocked_reply(*_):
+            entered.set()
+            release.wait(2)
+
+        h.reply = blocked_reply
+        request = threading.Thread(target=h.do_GET)
+        ticker = threading.Thread(target=lambda: (b.tick(), tick_done.set()))
+        request.start()
+        try:
+            self.assertTrue(entered.wait(1), "state response did not start")
+            ticker.start()
+            self.assertTrue(tick_done.wait(.3), "slow HTTP response blocked watchdog")
+            self.assertEqual(s.mode, "STOPPED")
+            self.assertEqual(s.reason, "browser_timeout")
+        finally:
+            release.set()
+            request.join(2)
+            if ticker.ident is not None:
+                ticker.join(2)
 
     def test_drive_comes_from_pwm_not_target(self):
         s = self.arm()

@@ -2,7 +2,7 @@
 Monotonic wall-clock watchdogs gate physics independently of held PCA registers.
 """
 
-import json, math, os, socket, sys, threading, time, uuid
+import copy, json, math, os, socket, sys, threading, time, uuid
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -389,13 +389,13 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/state":
+            # A slow reader/file must not hold the controller's state lock.
+            try:
+                telemetry = json.loads((RUN / "telemetry.json").read_text())
+            except (OSError, ValueError):
+                telemetry = {}
             with lock:
-                try:
-                    telemetry = json.loads((RUN / "telemetry.json").read_text())
-                except (OSError, ValueError):
-                    telemetry = {}
-                self.reply(
-                    200,
+                snapshot = copy.deepcopy(
                     dict(
                         epoch=EPOCH,
                         ticket=issue_ticket(),
@@ -410,8 +410,9 @@ class Handler(BaseHTTPRequestHandler):
                         telemetry=telemetry,
                         telemetry_age_s=time.monotonic() - telemetry.get("wall", 0),
                         parameters=P,
-                    ),
+                    )
                 )
+            self.reply(200, snapshot)
         elif self.path in ("/", "/app.js", "/status.js"):
             name = "index.html" if self.path == "/" else self.path[1:]
             self.reply(
