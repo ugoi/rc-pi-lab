@@ -9,7 +9,7 @@ import subprocess
 import time
 import urllib.request
 from pathlib import Path
-from browser_client import browser_command
+from browser_client import browser_command, close as close_browser
 
 root = Path(__file__).resolve().parents[2]
 evidence = root / "evidence/m3"
@@ -48,7 +48,7 @@ print(pids[0])
 paused = recording = False
 try:
     assert state()["readiness"] == "ready"
-    browser("tab", os.environ.get("M3_BROWSER_TARGET", "__owned__"))
+    result["browser"] = browser("tab", "__owned__")
     browser("open", url)
     browser("record", "start", str(evidence / ("browser-pause-" + label + ".mp4")), "--fps", "15")
     recording = True
@@ -119,8 +119,14 @@ finally:
             if result["result"] == "PASS":
                 result["result"] = "FAIL"
                 recording_failure = error
+    try:
+        close_browser()
+    except Exception as error:
+        result["cleanup_error"] = repr(error)
+        result["result"] = "FAIL"
+        recording_failure = error
     (evidence / ("browser-pause-" + label + ".json")).write_text(json.dumps(result, indent=2))
     print({k: v for k, v in result.items() if k not in ("samples", "before", "after")}, flush=True)
 
     if recording_failure is not None:
-        raise RuntimeError("video recording failed; control evidence saved") from recording_failure
+        raise RuntimeError("browser video or cleanup failed; evidence saved") from recording_failure

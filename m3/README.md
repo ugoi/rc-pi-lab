@@ -28,10 +28,12 @@ stopped. No host rebuild, production-service restart or public listener.
    Initial Pi TCG boot/package audit takes several minutes. Start stays blocked
    until neutral PWM and fresh guest ACKs exist. Check `evidence/m3/serial.log`.
 4. Open `http://127.0.0.1:18090` on Agent Services. For the existing private browser,
-   open https://agent-desktop.tailea77a9.ts.net through Tailscale and select the
-   **Pi 3 · Offroad Labor** tab (review runtime `127.0.0.1:18094`, Compose
-   project `ste112-fix`; a fresh default setup above uses 18090). It is the actual shared Cloak desktop; coordinate
-   before taking control. Alternatively forward privately from your computer:
+   open https://agent-desktop.tailea77a9.ts.net through Tailscale and navigate
+   an explicitly owned tab to the review runtime `http://127.0.0.1:18094`
+   (Compose project `ste112-fix`; a fresh default setup above uses 18090).
+   A previously published tab may no longer exist. This is the shared Cloak
+   desktop; coordinate before taking control. Automated tests below use a
+   separate browser process. Alternatively forward privately from your computer:
    `ssh -N -L 18090:127.0.0.1:18090 agent-services`, then open that local URL.
 5. Click **Start / neutral armen**, wait for **FAHRBEREIT**, then use gas and steering.
    **STOP** or Space stops and disarms. The controlling tab requests stop when hidden;
@@ -90,8 +92,8 @@ Set `M3_GUEST_CONTAINER=rc-pi-m3-qa-qemu`,
 `M3_URL=http://127.0.0.1:18091` before Compose and test helpers. Use a separate Compose project as well:
 `docker compose -p ste114 -f m3/compose.yaml up -d` (and the same `-p ste114`
 when stopping). Container names alone do not isolate Compose project ownership. Set
-`M3_BROWSER_SESSION=ste114` for the browser script, preserving the existing
-Cloak owner and all other tabs. The source does not require a repair or a private
+the pinned browser executable and hash described below. Browser tests spawn
+their own disposable process and never attach to personal Cloak. The source does not require a repair or a private
 replacement harness to use isolated container names/ports. To run fault cases,
 export `M3_TESTING=1` before Compose; record that test configuration. This enables only named
 fault-injection operations, not a different acceptance algorithm.
@@ -155,28 +157,77 @@ python3 m3/tests/idle_after_crash.py      # 60 s, exit 77 and idle PID1 marker
 python3 m3/tests/restart_guest.py
 ```
 
-Set the documented `M3_URL`, container names and `M3_BROWSER_SESSION` for your
-isolated QA checkout. Release the own browser tab to `about:blank` before HTTP
-matrix cases. `restart_bridge.py` and the browser fault helper preserve the
+Set the documented `M3_URL`, container names and browser executable/hash for your
+isolated QA checkout. Each completed browser helper closes its own browser before
+HTTP matrix cases. `restart_bridge.py` and the browser fault helper preserve the
 container's configured fault gate. A guest crash emits `M3_APP_EXIT code=77` then
 `M3_IDLE_INIT`; init keeps Linux alive without a shell, auto-restart or auto-arm.
 Every successful full restart must show a new epoch, fresh neutral ACK and PWM.
 See `m3/results/qa-fixes-20261012` and the native correction report for all attempts,
 source diagnosis, delivered pins, raw evidence and the independent QA boundary.
 
-### Isolated browser acceptance client (F3 investigation)
+### F4: process-isolated browser acceptance
 
-`python3 m3/tests/browser_bridge_fault.py` and `browser_guest_pause.py` attach
-to existing Cloak Chrome CDP9222 using Node's native WebSocket. Each test creates
-and disposes its own browser context, sends real mouse/key events, and records
-actual Page.startScreencast JPEG frames with timestamps. FFmpeg pads odd sizes
-to even pixels and encodes with one thread. The shell CLI probe reports Node22.23.2; the actual privileged test child
-resolves Node24.19.0. The live runs used that Node24.19.0 child and FFmpeg.
-Set M3_URL and M3_GUEST_CONTAINER for the owned lab. M3_BROWSER_TARGET is an
-optional explicit already-owned CDP target; tests never fall back to other tabs.
-No Chrome service/profile restart, provider login, or test input through /command
-is performed by this browser driver. Prior Agent Browser failures are retained.
-The first failed attempt is not erased by a subsequent helper fix.
+The previous F3 client used an incognito context inside personal Cloak. This
+isolated tab data, not browser crashes: independent QA observed SIGILL of the
+shared browser and loss of existing pages. The trigger is not isolated. The F4
+change removes that shared process from the automated test's control path; it
+does not repair Cloak or claim to restore lost tabs.
+The historical `browser-demo.sh` now exits before any action because it controlled
+personal Cloak. Its old source and evidence remain in Git/history; use the
+documented isolated helpers for new acceptance runs.
+
+`browser_bridge_fault.py` and `browser_guest_pause.py` now launch one disposable
+headless Chromium process per invocation, with a newly created empty temporary
+profile. CDP uses only that child's inherited pipes, without a debugging TCP
+listener. They never connect to port 9222. `M3_BROWSER_TARGET` is rejected before
+launch; no personal profile or session is copied. Node 22 or later and FFmpeg
+are required; the actual Node/browser versions and executable SHA256 are saved.
+
+On VM202 the verified existing binary is Cloak Chromium 146.0.7680.177.5. It is
+used headlessly for local application tests; this is not a new personal browser
+installation. Set both pins explicitly (a mismatched executable is refused):
+
+```sh
+export M3_BROWSER_EXECUTABLE=/home/hermes/.cloakbrowser/chromium-146.0.7680.177.5/chrome
+export M3_BROWSER_SHA256=715722e8605ae3ce81523c1218aba1ec89425786ab33ceaf99f8a6cb5e70e6e8
+unset M3_BROWSER_TARGET
+python3 m3/tests/test_owned_browser.py
+python3 m3/tests/shared_browser_snapshot.py snapshot evidence/m3/personal-before.json
+python3 m3/tests/browser_bridge_fault.py
+python3 m3/tests/shared_browser_snapshot.py verify evidence/m3/personal-before.json evidence/m3/personal-after.json
+```
+
+The standalone local test browser uses `--no-sandbox` for the existing NixOS
+runtime, no personal credentials/extensions, and only accepts loopback HTTP
+navigation. There is no browser service, host configuration or profile change.
+The owned process group is closed on stdin EOF, startup failure or SIGTERM;
+bounded TERM/KILL cleanup covers remaining children. Cleanup must leave no live
+owned processes, and only then removes its own temporary profile. Evidence is
+in `evidence/m3/browser-lifecycle-*.json`. An uncatchable kill of the test driver
+may leave its disposable profile; do not silently classify missing cleanup
+evidence as PASS. The process tests cover real browser death, pending-command
+cancellation, profile separation, real input/video, and rejection of external
+targets and incorrect binary pins. They are not Pi/I2C acceptance.
+
+The preservation witness performs only HTTP GET of the shared browser's version
+and page list, hashes the instance identity and target/URL pairs in memory, and
+never opens its CDP WebSocket. A missing/changed original page or browser restart
+fails the witness; concurrent human navigation is not automatically blamed on
+the test. No raw personal URL/title is written to evidence. Record a baseline
+before the bounded sequence and verify after each run and after cleanup.
+
+Actual Input.dispatchMouseEvent and Input.dispatchKeyEvent still drive the page.
+Telemetry/DOM reads do not inject control. Video uses real Page.startScreencast
+frames and timestamps, encoded with one thread. No browser input is sent through
+`/command` by this driver. Keep the first failed attempt. For F4 acceptance run
+three normal browser/bridge-failure cases, then a full guest restart and its
+first browser case, without retries or priming. Reset only the owned Webots
+world between cases. Existing F1/F2/F3 stop/lease evidence is reusable when the
+guest, bridge, UI and physics sources remain unchanged. Headless local Chromium
+does not prove Mac/Safari, remote desktop or physical hardware acceptance.
+
+Native process/profile separation follows the [Chrome debugging guidance](https://developer.chrome.com/blog/remote-debugging-port).
 
 ### F3: immutable guest filesystem during control
 

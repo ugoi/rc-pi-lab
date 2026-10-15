@@ -1,34 +1,34 @@
-// Bounded test client attached only to an explicit owned CDP target.
+// Bounded test client for its own disposable browser, never shared CDP9222.
 import fs from 'node:fs';
 import readline from 'node:readline';
 import {spawnSync} from 'node:child_process';
-const root = await (await fetch('http://127.0.0.1:9222/json/version')).json();
-const ws = new WebSocket(root.webSocketDebuggerUrl);
-await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
-let id=0, recording=null; const pending=new Map();
-function rpc(method,params={},sessionId){return new Promise((resolve,reject)=>{
- const key=++id,timer=setTimeout(()=>{pending.delete(key);reject(Error('CDP timeout '+method));},7000);
- pending.set(key,{resolve,reject,timer});ws.send(JSON.stringify({id:key,method,params,sessionId}));
-});}
-ws.onmessage=event=>{
- const m=JSON.parse(event.data);
- if(m.id && pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result);}
+import {launchOwnedBrowser} from './owned_browser.mjs';
+let recording=null;
+const browser=launchOwnedBrowser(m=>{
  if(m.method==='Page.screencastFrame'){
   const r=recording;
   if(r){const file=`${r.dir}/${String(r.frames.length).padStart(6,'0')}.jpg`;fs.writeFileSync(file,Buffer.from(m.params.data,'base64'));r.frames.push({file,timestamp:m.params.metadata.timestamp});}
   rpc('Page.screencastFrameAck',{sessionId:m.params.sessionId},m.sessionId).catch(()=>{});
  }
-};
-let target=process.env.M3_BROWSER_TARGET, ownedContext=null;
-if(!target){ownedContext=(await rpc('Target.createBrowserContext',{disposeOnDetach:true})).browserContextId;target=(await rpc('Target.createTarget',{url:'about:blank',browserContextId:ownedContext})).targetId;}
+});
+const rpc=browser.rpc;
+for(const signal of ['SIGINT','SIGTERM']) process.on(signal,()=>{
+ browser.cleanup(signal).then(()=>process.exit(signal==='SIGTERM'?143:130),error=>{console.error(error);process.exit(1);});
+});
+try {
+const root=await rpc('Browser.getVersion');browser.info.browserVersion=root.product;
+const ownedContext=(await rpc('Target.createBrowserContext',{disposeOnDetach:true})).browserContextId;
+const target=(await rpc('Target.createTarget',{url:'about:blank',browserContextId:ownedContext})).targetId;
 const {sessionId}=await rpc('Target.attachToTarget',{targetId:target,flatten:true});
 const call=(method,params={})=>rpc(method,params,sessionId);
 const evaluate=async expression=>{const r=await call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result?.value;};
 await call('Page.enable');
 async function click(sel){const p=await evaluate(`(()=>{const r=document.querySelector(${JSON.stringify(sel)}).getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()`);for(const type of ['mousePressed','mouseReleased'])await call('Input.dispatchMouseEvent',{type,...p,button:'left',clickCount:1});}
 async function command(a){
- if(a[0]==='tab'){if(a[1]!==target && a[1]!=='__owned__')throw Error('refusing other target');return {targetId:target,browserContextId:ownedContext,browserVersion:root.Browser};}
+ if(a[0]==='tab'){if(a[1]!==target && a[1]!=='__owned__')throw Error('refusing other target');return {targetId:target,browserContextId:ownedContext,...browser.info};}
  if(a[0]==='open'){
+  const address=new URL(a[1]);
+  if(address.protocol!=='http:' || address.hostname!=='127.0.0.1')throw Error('test browser accepts only loopback HTTP');
   await call('Page.navigate',{url:a[1]});await call('Page.bringToFront');
   const end=Date.now()+5000;while(!await evaluate("Boolean(document.querySelector('#arm'))")){if(Date.now()>end)throw Error('UI load timeout');await new Promise(r=>setTimeout(r,50));}return {};
  }
@@ -56,4 +56,4 @@ for await(const line of readline.createInterface({input:process.stdin,crlfDelay:
  try {process.stdout.write(JSON.stringify({success:true,data:await command(JSON.parse(line))})+'\n');}
  catch(error){process.stdout.write(JSON.stringify({success:false,error:String(error)})+'\n');}
 }
-await rpc('Target.detachFromTarget',{sessionId});if(ownedContext)await rpc('Target.disposeBrowserContext',{browserContextId:ownedContext});ws.close();
+} finally { await browser.cleanup('EOF or command/startup failure'); }

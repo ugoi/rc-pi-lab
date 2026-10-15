@@ -1,10 +1,10 @@
 """Real browser input and bridge death, observed independently in physics telemetry.
-Requires exclusive use of the named lab tab, not of the shared browser profile.
+Starts a disposable browser process; never controls the personal browser.
 """
 
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
-from browser_client import browser_command
+from browser_client import browser_command, close as close_browser
 
 root = Path(__file__).resolve().parents[2]
 evidence = root / "evidence/m3"
@@ -16,7 +16,7 @@ rows = []
 result = {
     "result": "FAIL",
     "case": "browser_bridge_kill",
-    "client": "Cloak Chrome via native CDP, fixed owned tab, real Input events",
+    "client": "Isolated headless Chromium process via private CDP pipes, real Input events",
 }
 
 
@@ -35,7 +35,7 @@ def state():
 recording = False
 try:
     assert state()["readiness"] == "ready"
-    browser("tab", os.environ.get("M3_BROWSER_TARGET", "__owned__"))
+    result["browser"] = browser("tab", "__owned__")
     browser("open", url)
     browser("set", "viewport", "1280", "900")
     browser(
@@ -134,6 +134,12 @@ finally:
             if result["result"] == "PASS":
                 result["result"] = "FAIL"
                 recording_failure = error
+    try:
+        close_browser()
+    except Exception as error:
+        result["cleanup_error"] = repr(error)
+        result["result"] = "FAIL"
+        recording_failure = error
     result["physics_during_kill"] = rows
     (evidence / ("browser-bridge-fault-" + label + ".json")).write_text(
         json.dumps(result, indent=2)
@@ -148,4 +154,4 @@ finally:
     )
 
     if recording_failure is not None:
-        raise RuntimeError("video recording failed; control evidence saved") from recording_failure
+        raise RuntimeError("browser video or cleanup failed; evidence saved") from recording_failure
